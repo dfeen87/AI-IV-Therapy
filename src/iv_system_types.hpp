@@ -1,3 +1,15 @@
+/*
+ * iv_system_types.hpp
+ *
+ * Public system data contracts for the AI-Optimized Intravenous Therapy
+ * Control System.
+ *
+ * These structures define stable interfaces between system components.
+ * Internal implementations may use extended representations.
+ *
+ * No control logic is defined in this file.
+ */
+
 #pragma once
 
 #include <string>
