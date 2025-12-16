@@ -506,11 +506,282 @@
 
     <div class="footer">
         AI-Optimized Intravenous Therapy Control System v2.0 | Enhanced Energy Transfer Model<br>
-        White Paper Implementation - Section 4.1 Full Dynamics | MIT License
+        White Paper Implementation - Section 4.1 Full Dynamics | MIT License<br>
+        <span style="color: #4caf50; font-weight: bold;">✓ Hardened Architecture</span> | Pure Model | Test Suite | C++ Integration Ready
     </div>
 
     <script>
-        // Simulation state
+        // ========================================================================
+        // PURE MODEL STEP FUNCTION (NO DOM ACCESS)
+        // ========================================================================
+        
+        /**
+         * Core control algorithm - deterministic, testable, C++ compatible
+         * @param {Object} state - Telemetry state
+         * @param {number} dt - Time step in seconds
+         * @returns {Object} Control outputs
+         */
+        function computeControlStep(state, dt) {
+            const {
+                hydration,
+                heartRate,
+                spo2,
+                temp,
+                lactate,
+                fatigue,
+                cardiacOutput,
+                simTime
+            } = state;
+
+            // --- Energy proxy calculation ---
+            const h_term = 1 / (1 + Math.exp(-0.1 * (hydration - 60)));
+            const f_term = fatigue < 0.7 ? (1 - fatigue) : 0.3 * (1 - fatigue);
+            const o_term = 1 / (1 + Math.exp(-0.3 * (spo2 - 92)));
+            const l_term = Math.exp(-0.5 * Math.max(0, lactate - 2.0));
+
+            const energyT =
+                0.30 * h_term +
+                0.25 * 1.0 +
+                0.20 * f_term +
+                0.15 * o_term +
+                0.10 * l_term;
+
+            // --- Flow dynamics ---
+            const flowVelocity = (cardiacOutput * 4.0 + 0.85 * 0.5) / 75;
+            const flowEfficiency = Math.exp(-0.5 * Math.pow((flowVelocity - 20) / 5, 2));
+
+            // --- Cardiac reserve ---
+            const maxHR = 220 - 35;
+            const cardiacReserve =
+                1 - (1 / (1 + Math.exp(-10 * (heartRate / maxHR - 0.85))));
+
+            // --- Risk assessment ---
+            const dehydrationRisk = Math.max(0, Math.min(1, (100 - hydration) / 50));
+            const energyDepletionRisk = 1 - energyT;
+            const metabolicRisk = 0.4 * dehydrationRisk + 0.6 * energyDepletionRisk;
+            const thermalRisk = Math.abs(temp - 37) / 3;
+            const riskScore = 0.6 * 0.0 + 0.3 * metabolicRisk + 0.1 * thermalRisk;
+
+            // --- Control calculation ---
+            const hydrationDeficit = (100 - hydration) / 100;
+            const hydrationUrgency =
+                hydrationDeficit < 0.5
+                    ? hydrationDeficit
+                    : 1 / (1 + Math.exp(-5 * (hydrationDeficit - 0.5)));
+
+            const energyGap = 1 - energyT;
+            const metabolicLoad =
+                0.3 * (heartRate - 60) / 100 +
+                0.25 * Math.abs(temp - 37) / 3 +
+                0.25 * lactate / 10 +
+                0.2 * 0.2;
+
+            const energyNeed = energyGap * (1 + 0.5 * metabolicLoad);
+            const riskAmplifier = 1 + 0.5 * riskScore;
+
+            let infusionRate =
+                0.4 +
+                1.4 *
+                    Math.max(
+                        0,
+                        Math.min(1, (0.6 * hydrationUrgency + 0.4 * energyNeed) * riskAmplifier)
+                    );
+
+            // --- Coherence modulation ---
+            const coherence = 0.85 + 0.1 * Math.sin(simTime * 0.5);
+            infusionRate *= coherence;
+
+            // --- Cardiac limiting ---
+            if (cardiacReserve < 0.3) {
+                const scaling = 0.5 + 0.5 * (1 / (1 + Math.exp(-10 * (cardiacReserve - 0.3))));
+                infusionRate *= scaling;
+            }
+
+            infusionRate = Math.max(0.1, Math.min(1.5, infusionRate));
+
+            // --- Absolute energy transfer ---
+            const P_input = 100 + 35;
+            const m_dot = infusionRate / 60000;
+            const I_sp = 1.2;
+            const eta = 0.75;
+            const energyAbsolute = (P_input * flowEfficiency * m_dot * I_sp * eta) / 75;
+
+            // --- Confidence metric ---
+            const confidence = 1 - (1 - coherence * (1 - 0.3 * metabolicLoad));
+
+            return {
+                energyT,
+                cardiacReserve,
+                riskScore,
+                metabolicRisk,
+                thermalRisk,
+                infusionRate,
+                flowVelocity,
+                flowEfficiency,
+                metabolicLoad,
+                energyAbsolute,
+                coherence,
+                hydrationUrgency,
+                energyNeed,
+                confidence
+            };
+        }
+
+        // ========================================================================
+        // TELEMETRY SOURCE (PLUGGABLE)
+        // ========================================================================
+        
+        /**
+         * Simulated telemetry - replace with real data source
+         * @param {number} simTime - Simulation time in seconds
+         * @returns {Object} Telemetry state matching JSON contract
+         */
+        function simulateTelemetry(simTime) {
+            return {
+                hydration: 65 + 15 * Math.sin(simTime * 0.05),
+                heartRate: 70 + 20 * Math.sin(simTime * 0.1),
+                spo2: 97 + 2 * Math.sin(simTime * 0.08),
+                temp: 37.0 + 0.5 * Math.sin(simTime * 0.03),
+                lactate: 2.0 + 1.0 * Math.sin(simTime * 0.04),
+                fatigue: 0.3 + 0.2 * Math.sin(simTime * 0.02),
+                cardiacOutput: 5.0 + 1.0 * Math.sin(simTime * 0.06),
+                timestamp_ms: Date.now()
+            };
+        }
+
+        /**
+         * Load telemetry from external source (WebSocket, REST API, etc.)
+         * Uncomment and implement when connecting to C++ backend
+         */
+        /*
+        async function getTelemetryFromCpp() {
+            const response = await fetch('/api/telemetry');
+            const data = await response.json();
+            return {
+                hydration: data.hydration,
+                heartRate: data.heart_rate,
+                spo2: data.spo2,
+                temp: data.temperature,
+                lactate: data.lactate,
+                fatigue: data.fatigue || 0.3,
+                cardiacOutput: data.cardiac_output,
+                timestamp_ms: data.timestamp_ms
+            };
+        }
+        */
+
+        // ========================================================================
+        // TEST HARNESS
+        // ========================================================================
+        
+        const TestResults = {
+            passed: 0,
+            failed: 0,
+            tests: []
+        };
+
+        function assert(condition, message) {
+            if (condition) {
+                TestResults.passed++;
+                TestResults.tests.push({ status: '✓', message });
+            } else {
+                TestResults.failed++;
+                TestResults.tests.push({ status: '✗', message });
+                console.error('ASSERTION FAILED:', message);
+            }
+        }
+
+        function runTests() {
+            console.log('=== Running AI-IV Control System Tests ===');
+            TestResults.passed = 0;
+            TestResults.failed = 0;
+            TestResults.tests = [];
+
+            // Test 1: Dehydration spike scenario
+            const dehydrationState = {
+                hydration: 48,
+                heartRate: 95,
+                spo2: 96,
+                temp: 37.4,
+                lactate: 3.2,
+                fatigue: 0.6,
+                cardiacOutput: 4.8,
+                simTime: 0
+            };
+            const dehyResult = computeControlStep(dehydrationState, 0.2);
+            assert(dehyResult.infusionRate > 0.8, 'Dehydration: Infusion should increase (>0.8)');
+            assert(dehyResult.riskScore > 0.3, 'Dehydration: Risk should be elevated (>0.3)');
+            assert(dehyResult.energyT < 0.7, 'Dehydration: Energy should be depleted (<0.7)');
+
+            // Test 2: Optimal state
+            const optimalState = {
+                hydration: 75,
+                heartRate: 70,
+                spo2: 98,
+                temp: 37.0,
+                lactate: 1.8,
+                fatigue: 0.2,
+                cardiacOutput: 5.5,
+                simTime: 0
+            };
+            const optResult = computeControlStep(optimalState, 0.2);
+            assert(optResult.infusionRate < 0.9, 'Optimal: Infusion should be moderate (<0.9)');
+            assert(optResult.riskScore < 0.3, 'Optimal: Risk should be low (<0.3)');
+            assert(optResult.energyT > 0.7, 'Optimal: Energy should be good (>0.7)');
+
+            // Test 3: Cardiac reserve limiting
+            const cardiacStressState = {
+                hydration: 55,
+                heartRate: 165,
+                spo2: 95,
+                temp: 37.5,
+                lactate: 3.5,
+                fatigue: 0.7,
+                cardiacOutput: 4.0,
+                simTime: 0
+            };
+            const cardiacResult = computeControlStep(cardiacStressState, 0.2);
+            assert(cardiacResult.cardiacReserve < 0.5, 'Cardiac stress: Reserve should be low (<0.5)');
+            assert(cardiacResult.infusionRate < 1.2, 'Cardiac stress: Infusion should be limited (<1.2)');
+
+            // Test 4: Energy proxy bounds
+            const extremeState = {
+                hydration: 95,
+                heartRate: 60,
+                spo2: 99,
+                temp: 37.0,
+                lactate: 1.0,
+                fatigue: 0.1,
+                cardiacOutput: 6.0,
+                simTime: 0
+            };
+            const extremeResult = computeControlStep(extremeState, 0.2);
+            assert(extremeResult.energyT >= 0 && extremeResult.energyT <= 1, 'Energy proxy in valid range [0,1]');
+            assert(extremeResult.infusionRate >= 0.1 && extremeResult.infusionRate <= 1.5, 'Infusion rate within bounds [0.1, 1.5]');
+
+            // Test 5: Metabolic load calculation
+            const metabolicState = {
+                hydration: 70,
+                heartRate: 120,
+                temp: 38.5,
+                lactate: 4.0,
+                spo2: 94,
+                fatigue: 0.5,
+                cardiacOutput: 5.0,
+                simTime: 0
+            };
+            const metabResult = computeControlStep(metabolicState, 0.2);
+            assert(metabResult.metabolicLoad > 0.4, 'High metabolic load detected (>0.4)');
+            assert(metabResult.metabolicRisk > 0.4, 'Metabolic risk elevated (>0.4)');
+
+            console.log(`Tests complete: ${TestResults.passed} passed, ${TestResults.failed} failed`);
+            return TestResults;
+        }
+
+        // ========================================================================
+        // STATE MANAGEMENT
+        // ========================================================================
+        
         let simTime = 0;
         let sessionStartTime = Date.now();
         const dataPoints = {
@@ -523,7 +794,197 @@
         };
         const maxDataPoints = 90; // 30 minutes at 5Hz / display every 10s
 
-        // Chart configurations
+        // ========================================================================
+        // HELPER FUNCTIONS
+        // ========================================================================
+        
+        function getStatusClass(value, thresholds) {
+            if (value < thresholds.critical || value > thresholds.criticalHigh) return 'critical';
+            if (value < thresholds.warning || value > thresholds.warningHigh) return 'warning';
+            return 'good';
+        }
+
+        // ========================================================================
+        // RENDERING FUNCTIONS (DOM UPDATES ONLY)
+        // ========================================================================
+        
+        function renderVitals(telemetry) {
+            document.getElementById('hydration').textContent = telemetry.hydration.toFixed(1);
+            document.getElementById('heartRate').textContent = Math.round(telemetry.heartRate);
+            document.getElementById('spo2').textContent = Math.round(telemetry.spo2);
+            document.getElementById('temp').textContent = telemetry.temp.toFixed(1);
+            document.getElementById('lactate').textContent = telemetry.lactate.toFixed(1);
+            document.getElementById('cardiacOutput').textContent = telemetry.cardiacOutput.toFixed(1);
+
+            // Update status indicators
+            document.getElementById('hydrationStatus').className = 'status-indicator ' + 
+                getStatusClass(telemetry.hydration, { critical: 50, warning: 60, criticalHigh: 100, warningHigh: 100 });
+            document.getElementById('hrStatus').className = 'status-indicator ' + 
+                getStatusClass(telemetry.heartRate, { critical: 50, warning: 60, criticalHigh: 120, warningHigh: 100 });
+            document.getElementById('spo2Status').className = 'status-indicator ' + 
+                getStatusClass(telemetry.spo2, { critical: 85, warning: 90, criticalHigh: 100, warningHigh: 100 });
+            document.getElementById('tempStatus').className = 'status-indicator ' + 
+                getStatusClass(telemetry.temp, { critical: 35, warning: 36, criticalHigh: 39, warningHigh: 38.5 });
+            document.getElementById('lactateStatus').className = 'status-indicator ' + 
+                getStatusClass(telemetry.lactate, { critical: 0, warning: 0, criticalHigh: 4, warningHigh: 3 });
+            document.getElementById('coStatus').className = 'status-indicator good';
+        }
+
+        function renderControl(model, telemetry) {
+            document.getElementById('energyBar').style.width = (model.energyT * 100) + '%';
+            document.getElementById('energyBar').textContent = model.energyT.toFixed(2);
+            document.getElementById('energyAbsolute').textContent = model.energyAbsolute.toFixed(2);
+            document.getElementById('flowVelocity').textContent = model.flowVelocity.toFixed(1);
+            document.getElementById('flowEfficiency').textContent = model.flowEfficiency.toFixed(2);
+            document.getElementById('metabolicLoad').textContent = model.metabolicLoad.toFixed(2);
+            document.getElementById('tissueEfficiency').textContent = '0.78';
+            
+            document.getElementById('desiredRate').textContent = model.infusionRate.toFixed(2);
+            document.getElementById('actualRate').textContent = model.infusionRate.toFixed(2);
+            document.getElementById('confidence').textContent = model.confidence.toFixed(2);
+            document.getElementById('hydrationUrgency').textContent = model.hydrationUrgency.toFixed(2);
+            document.getElementById('energyNeed').textContent = model.energyNeed.toFixed(2);
+            
+            document.getElementById('infusionRate').textContent = model.infusionRate.toFixed(2) + ' ml/min';
+            document.getElementById('totalVolume').textContent = Math.round(simTime * model.infusionRate * 60 / 200).toLocaleString() + ' ml';
+            
+            // Predictions
+            const predHydration = telemetry.hydration - 3;
+            const predEnergy = model.energyT - 0.03;
+            document.getElementById('predHydration').textContent = predHydration.toFixed(0) + '% (↓3%)';
+            document.getElementById('predEnergy').textContent = predEnergy.toFixed(2) + ' (↓0.03)';
+            
+            if (predHydration < 50) {
+                document.getElementById('predAction').textContent = '⚠️ Preemptive boost +20%';
+                document.getElementById('predAction').style.color = '#ff9800';
+            } else {
+                document.getElementById('predAction').textContent = 'Nominal';
+                document.getElementById('predAction').style.color = '#4caf50';
+            }
+        }
+
+        function renderRisk(model, telemetry) {
+            document.getElementById('riskScore').textContent = model.riskScore.toFixed(2);
+            document.getElementById('cardiacBar').style.width = (model.cardiacReserve * 100) + '%';
+            document.getElementById('cardiacBar').textContent = model.cardiacReserve.toFixed(2);
+            document.getElementById('coherenceBar').style.width = (model.coherence * 100) + '%';
+            document.getElementById('coherenceBar').textContent = model.coherence.toFixed(2);
+            
+            document.getElementById('riskStatus').className = 'status-indicator ' + 
+                getStatusClass(model.riskScore, { critical: 0.75, warning: 0.5, criticalHigh: 1, warningHigh: 1 });
+            
+            // Risk badges
+            document.getElementById('criticalBadge').textContent = 'Critical: 0.00';
+            document.getElementById('criticalBadge').className = 'metric-badge badge-good';
+            document.getElementById('metabolicBadge').textContent = 'Metabolic: ' + model.metabolicRisk.toFixed(2);
+            document.getElementById('metabolicBadge').className = 'metric-badge ' + 
+                (model.metabolicRisk > 0.5 ? 'badge-warning' : 'badge-good');
+            document.getElementById('thermalBadge').textContent = 'Thermal: ' + model.thermalRisk.toFixed(2);
+            document.getElementById('thermalBadge').className = 'metric-badge badge-good';
+        }
+
+        function renderAlerts(model, telemetry) {
+            const alerts = [];
+            if (telemetry.hydration < 60) alerts.push('⚠️ Hydration below optimal threshold (60%)');
+            if (telemetry.heartRate > 100) alerts.push('⚠️ Elevated heart rate detected');
+            if (model.riskScore > 0.5) alerts.push('⚠️ Moderate risk level - enhanced monitoring');
+            if (model.cardiacReserve < 0.3) alerts.push('🚨 Low cardiac reserve - infusion limited');
+            if (model.energyT < 0.6) alerts.push('⚠️ Energy depletion detected');
+            
+            const alertsContainer = document.getElementById('alertsContainer');
+            if (alerts.length > 0) {
+                alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item">${a}</div>`).join('');
+                alertsContainer.parentElement.style.border = '2px solid ' + (alerts.some(a => a.includes('🚨')) ? '#f44336' : '#ff9800');
+            } else {
+                alertsContainer.innerHTML = '<p style="color: #88c0d0; text-align: center; padding: 20px;">✓ No active warnings - all systems nominal</p>';
+                alertsContainer.parentElement.style.border = '2px solid rgba(76, 175, 80, 0.5)';
+            }
+            
+            // System status
+            const statusEl = document.getElementById('systemStatus');
+            if (model.riskScore > 0.75) {
+                statusEl.textContent = 'HIGH RISK';
+                statusEl.className = 'status-value critical';
+            } else if (model.riskScore > 0.5) {
+                statusEl.textContent = 'CAUTION';
+                statusEl.className = 'status-value warning';
+            } else {
+                statusEl.textContent = 'ACTIVE';
+                statusEl.className = 'status-value';
+            }
+        }
+
+        function renderSessionTime() {
+            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+            const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const seconds = String(elapsed % 60).padStart(2, '0');
+            document.getElementById('sessionTime').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // ========================================================================
+        // MAIN UPDATE LOOP (ORCHESTRATION ONLY)
+        // ========================================================================
+        
+        function updateDashboard() {
+            simTime += 0.2; // 200ms increments
+            
+            // 1. Get telemetry (simulated or from C++)
+            const telemetry = simulateTelemetry(simTime);
+            
+            // 2. Compute control step (pure function)
+            const model = computeControlStep(
+                { ...telemetry, simTime },
+                0.2
+            );
+            
+            // 3. Render to UI
+            renderVitals(telemetry);
+            renderControl(model, telemetry);
+            renderRisk(model, telemetry);
+            renderAlerts(model, telemetry);
+            renderSessionTime();
+            
+            // 4. Update charts (every 10 seconds)
+            if (Math.round(simTime * 10) % 100 === 0) {
+                updateCharts(telemetry, model);
+            }
+        }
+
+        function updateCharts(telemetry, model) {
+            const timeLabel = Math.floor(simTime / 60) + ':' + String(Math.floor(simTime % 60)).padStart(2, '0');
+            
+            dataPoints.time.push(timeLabel);
+            dataPoints.hydration.push(telemetry.hydration);
+            dataPoints.energy.push(model.energyT);
+            dataPoints.infusion.push(model.infusionRate);
+            dataPoints.cardiac.push(model.cardiacReserve);
+            dataPoints.risk.push(model.riskScore);
+            
+            if (dataPoints.time.length > maxDataPoints) {
+                dataPoints.time.shift();
+                dataPoints.hydration.shift();
+                dataPoints.energy.shift();
+                dataPoints.infusion.shift();
+                dataPoints.cardiac.shift();
+                dataPoints.risk.shift();
+            }
+            
+            hydrationChart.data.labels = dataPoints.time;
+            hydrationChart.data.datasets[0].data = dataPoints.hydration;
+            hydrationChart.data.datasets[1].data = dataPoints.energy.map(e => e * 100);
+            hydrationChart.update();
+            
+            infusionChart.data.labels = dataPoints.time;
+            infusionChart.data.datasets[0].data = dataPoints.infusion;
+            infusionChart.data.datasets[1].data = dataPoints.cardiac;
+            infusionChart.update();
+        }
+
+        // ========================================================================
+        // CHART CONFIGURATION
+        // ========================================================================
+        
         const chartConfig = {
             type: 'line',
             options: {
@@ -642,222 +1103,57 @@
             }
         });
 
-        // Status indicator helper
-        function getStatusClass(value, thresholds) {
-            if (value < thresholds.critical || value > thresholds.criticalHigh) return 'critical';
-            if (value < thresholds.warning || value > thresholds.warningHigh) return 'warning';
-            return 'good';
-        }
-
-        // Update dashboard
-        function updateDashboard() {
-            simTime += 0.2; // 200ms increments
-            
-            // Simulate telemetry (matching C++ simulation)
-            const hydration = 65 + 15 * Math.sin(simTime * 0.05);
-            const heartRate = 70 + 20 * Math.sin(simTime * 0.1);
-            const spo2 = 97 + 2 * Math.sin(simTime * 0.08);
-            const temp = 37.0 + 0.5 * Math.sin(simTime * 0.03);
-            const lactate = 2.0 + 1.0 * Math.sin(simTime * 0.04);
-            const fatigue = 0.3 + 0.2 * Math.sin(simTime * 0.02);
-            const cardiacOutput = 5.0 + 1.0 * Math.sin(simTime * 0.06);
-            
-            // Calculate energy proxy
-            const h_term = 1 / (1 + Math.exp(-0.1 * (hydration - 60)));
-            const f_term = fatigue < 0.7 ? (1 - fatigue) : 0.3 * (1 - fatigue);
-            const o_term = 1 / (1 + Math.exp(-0.3 * (spo2 - 92)));
-            const l_term = Math.exp(-0.5 * Math.max(0, lactate - 2.0));
-            const energyT = 0.30 * h_term + 0.25 * 1.0 + 0.20 * f_term + 0.15 * o_term + 0.10 * l_term;
-            
-            // Flow dynamics
-            const flowVelocity = (cardiacOutput * 4.0 + 0.85 * 0.5) / 75;
-            const flowEfficiency = Math.exp(-0.5 * Math.pow((flowVelocity - 20) / 5, 2));
-            
-            // Cardiac reserve
-            const maxHR = 220 - 35;
-            const cardiacReserve = 1 - (1 / (1 + Math.exp(-10 * (heartRate / maxHR - 0.85))));
-            
-            // Risk score
-            const dehydrationRisk = Math.max(0, Math.min(1, (100 - hydration) / 50));
-            const energyDepletionRisk = 1 - energyT;
-            const metabolicRisk = 0.4 * dehydrationRisk + 0.6 * energyDepletionRisk;
-            const riskScore = 0.6 * 0.0 + 0.3 * metabolicRisk + 0.1 * 0.0;
-            
-            // Control calculation
-            const hydrationDeficit = (100 - hydration) / 100;
-            const hydrationUrgency = hydrationDeficit < 0.5 ? hydrationDeficit : 
-                1 / (1 + Math.exp(-5 * (hydrationDeficit - 0.5)));
-            const energyGap = 1 - energyT;
-            const metabolicLoad = 0.3 * (heartRate - 60) / 100 + 0.25 * Math.abs(temp - 37) / 3 + 
-                                  0.25 * lactate / 10 + 0.2 * 0.2;
-            const energyNeed = energyGap * (1 + 0.5 * metabolicLoad);
-            const riskAmplifier = 1 + 0.5 * riskScore;
-            
-            let infusionRate = 0.4 + 1.4 * Math.max(0, Math.min(1, 
-                (0.6 * hydrationUrgency + 0.4 * energyNeed) * riskAmplifier));
-            
-            // Coherence modulation
-            const coherence = 0.85 + 0.1 * Math.sin(simTime * 0.5);
-            infusionRate *= coherence;
-            
-            // Cardiac limiting
-            if (cardiacReserve < 0.3) {
-                const scaling = 0.5 + 0.5 * (1 / (1 + Math.exp(-10 * (cardiacReserve - 0.3))));
-                infusionRate *= scaling;
-            }
-            
-            infusionRate = Math.max(0.1, Math.min(1.5, infusionRate));
-            
-            // Absolute energy transfer
-            const P_input = 100 + 35;
-            const m_dot = infusionRate / 60000;
-            const I_sp = 1.2;
-            const eta = 0.75;
-            const energyAbsolute = (P_input * flowEfficiency * m_dot * I_sp * eta) / 75;
-            
-            // Update UI
-            document.getElementById('hydration').textContent = hydration.toFixed(1);
-            document.getElementById('heartRate').textContent = Math.round(heartRate);
-            document.getElementById('spo2').textContent = Math.round(spo2);
-            document.getElementById('temp').textContent = temp.toFixed(1);
-            document.getElementById('lactate').textContent = lactate.toFixed(1);
-            document.getElementById('cardiacOutput').textContent = cardiacOutput.toFixed(1);
-            
-            document.getElementById('energyBar').style.width = (energyT * 100) + '%';
-            document.getElementById('energyBar').textContent = energyT.toFixed(2);
-            document.getElementById('energyAbsolute').textContent = energyAbsolute.toFixed(2);
-            document.getElementById('flowVelocity').textContent = flowVelocity.toFixed(1);
-            document.getElementById('flowEfficiency').textContent = flowEfficiency.toFixed(2);
-            document.getElementById('metabolicLoad').textContent = metabolicLoad.toFixed(2);
-            document.getElementById('tissueEfficiency').textContent = '0.78';
-            
-            document.getElementById('riskScore').textContent = riskScore.toFixed(2);
-            document.getElementById('cardiacBar').style.width = (cardiacReserve * 100) + '%';
-            document.getElementById('cardiacBar').textContent = cardiacReserve.toFixed(2);
-            document.getElementById('coherenceBar').style.width = (coherence * 100) + '%';
-            document.getElementById('coherenceBar').textContent = coherence.toFixed(2);
-            
-            document.getElementById('desiredRate').textContent = infusionRate.toFixed(2);
-            document.getElementById('actualRate').textContent = infusionRate.toFixed(2);
-            document.getElementById('confidence').textContent = (1 - (1 - coherence * (1 - 0.3 * metabolicLoad))).toFixed(2);
-            document.getElementById('hydrationUrgency').textContent = hydrationUrgency.toFixed(2);
-            document.getElementById('energyNeed').textContent = energyNeed.toFixed(2);
-            
-            document.getElementById('infusionRate').textContent = infusionRate.toFixed(2) + ' ml/min';
-            document.getElementById('totalVolume').textContent = Math.round(simTime * infusionRate * 60 / 200).toLocaleString() + ' ml';
-            
-            // Update status indicators
-            document.getElementById('hydrationStatus').className = 'status-indicator ' + 
-                getStatusClass(hydration, { critical: 50, warning: 60, criticalHigh: 100, warningHigh: 100 });
-            document.getElementById('hrStatus').className = 'status-indicator ' + 
-                getStatusClass(heartRate, { critical: 50, warning: 60, criticalHigh: 120, warningHigh: 100 });
-            document.getElementById('spo2Status').className = 'status-indicator ' + 
-                getStatusClass(spo2, { critical: 85, warning: 90, criticalHigh: 100, warningHigh: 100 });
-            document.getElementById('tempStatus').className = 'status-indicator ' + 
-                getStatusClass(temp, { critical: 35, warning: 36, criticalHigh: 39, warningHigh: 38.5 });
-            document.getElementById('lactateStatus').className = 'status-indicator ' + 
-                getStatusClass(lactate, { critical: 0, warning: 0, criticalHigh: 4, warningHigh: 3 });
-            document.getElementById('coStatus').className = 'status-indicator good';
-            document.getElementById('riskStatus').className = 'status-indicator ' + 
-                getStatusClass(riskScore, { critical: 0.75, warning: 0.5, criticalHigh: 1, warningHigh: 1 });
-            
-            // Predictions
-            const predHydration = hydration - 3;
-            const predEnergy = energyT - 0.03;
-            document.getElementById('predHydration').textContent = predHydration.toFixed(0) + '% (↓3%)';
-            document.getElementById('predEnergy').textContent = predEnergy.toFixed(2) + ' (↓0.03)';
-            
-            if (predHydration < 50) {
-                document.getElementById('predAction').textContent = '⚠️ Preemptive boost +20%';
-                document.getElementById('predAction').style.color = '#ff9800';
-            } else {
-                document.getElementById('predAction').textContent = 'Nominal';
-                document.getElementById('predAction').style.color = '#4caf50';
-            }
-            
-            // Risk badges
-            document.getElementById('criticalBadge').textContent = 'Critical: 0.00';
-            document.getElementById('criticalBadge').className = 'metric-badge badge-good';
-            document.getElementById('metabolicBadge').textContent = 'Metabolic: ' + metabolicRisk.toFixed(2);
-            document.getElementById('metabolicBadge').className = 'metric-badge ' + 
-                (metabolicRisk > 0.5 ? 'badge-warning' : 'badge-good');
-            document.getElementById('thermalBadge').textContent = 'Thermal: ' + (Math.abs(temp - 37) / 3).toFixed(2);
-            document.getElementById('thermalBadge').className = 'metric-badge badge-good';
-            
-            // Alerts
-            const alerts = [];
-            if (hydration < 60) alerts.push('⚠️ Hydration below optimal threshold (60%)');
-            if (heartRate > 100) alerts.push('⚠️ Elevated heart rate detected');
-            if (riskScore > 0.5) alerts.push('⚠️ Moderate risk level - enhanced monitoring');
-            if (cardiacReserve < 0.3) alerts.push('🚨 Low cardiac reserve - infusion limited');
-            if (energyT < 0.6) alerts.push('⚠️ Energy depletion detected');
-            
-            const alertsContainer = document.getElementById('alertsContainer');
-            if (alerts.length > 0) {
-                alertsContainer.innerHTML = alerts.map(a => `<div class="alert-item">${a}</div>`).join('');
-                alertsContainer.parentElement.style.border = '2px solid ' + (alerts.some(a => a.includes('🚨')) ? '#f44336' : '#ff9800');
-            } else {
-                alertsContainer.innerHTML = '<p style="color: #88c0d0; text-align: center; padding: 20px;">✓ No active warnings - all systems nominal</p>';
-                alertsContainer.parentElement.style.border = '2px solid rgba(76, 175, 80, 0.5)';
-            }
-            
-            // Update charts every 10 seconds
-            if (Math.round(simTime * 10) % 100 === 0) {
-                const timeLabel = Math.floor(simTime / 60) + ':' + String(Math.floor(simTime % 60)).padStart(2, '0');
-                
-                dataPoints.time.push(timeLabel);
-                dataPoints.hydration.push(hydration);
-                dataPoints.energy.push(energyT);
-                dataPoints.infusion.push(infusionRate);
-                dataPoints.cardiac.push(cardiacReserve);
-                dataPoints.risk.push(riskScore);
-                
-                if (dataPoints.time.length > maxDataPoints) {
-                    dataPoints.time.shift();
-                    dataPoints.hydration.shift();
-                    dataPoints.energy.shift();
-                    dataPoints.infusion.shift();
-                    dataPoints.cardiac.shift();
-                    dataPoints.risk.shift();
-                }
-                
-                hydrationChart.data.labels = dataPoints.time;
-                hydrationChart.data.datasets[0].data = dataPoints.hydration;
-                hydrationChart.data.datasets[1].data = dataPoints.energy.map(e => e * 100);
-                hydrationChart.update();
-                
-                infusionChart.data.labels = dataPoints.time;
-                infusionChart.data.datasets[0].data = dataPoints.infusion;
-                infusionChart.data.datasets[1].data = dataPoints.cardiac;
-                infusionChart.update();
-            }
-            
-            // Session time
-            const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
-            const hours = String(Math.floor(elapsed / 3600)).padStart(2, '0');
-            const minutes = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
-            const seconds = String(elapsed % 60).padStart(2, '0');
-            document.getElementById('sessionTime').textContent = `${hours}:${minutes}:${seconds}`;
-            
-            // System status
-            const statusEl = document.getElementById('systemStatus');
-            if (riskScore > 0.75) {
-                statusEl.textContent = 'HIGH RISK';
-                statusEl.className = 'status-value critical';
-            } else if (riskScore > 0.5) {
-                statusEl.textContent = 'CAUTION';
-                statusEl.className = 'status-value warning';
-            } else {
-                statusEl.textContent = 'ACTIVE';
-                statusEl.className = 'status-value';
-            }
-        }
+        // ========================================================================
+        // INITIALIZATION
+        // ========================================================================
+        
+        // Run tests on startup
+        console.log('%c🧪 Running System Tests...', 'color: #00d4ff; font-weight: bold; font-size: 14px');
+        const testResults = runTests();
+        console.log(
+            `%c${testResults.passed} passed, ${testResults.failed} failed`,
+            `color: ${testResults.failed === 0 ? '#4caf50' : '#f44336'}; font-weight: bold`
+        );
+        
+        // Display test results in console table
+        console.table(testResults.tests);
         
         // Start simulation at 5Hz (200ms)
         setInterval(updateDashboard, 200);
         
         // Initial update
         updateDashboard();
+        
+        // ========================================================================
+        // EXTERNAL API (for integration testing)
+        // ========================================================================
+        
+        // Expose API for external testing
+        window.AIIV = {
+            computeControlStep,
+            simulateTelemetry,
+            runTests,
+            getState: () => ({
+                simTime,
+                dataPoints,
+                sessionStartTime
+            }),
+            // For C++ integration testing
+            sendTelemetry: (data) => {
+                const model = computeControlStep({ ...data, simTime }, 0.2);
+                return {
+                    infusionRate: model.infusionRate,
+                    energyT: model.energyT,
+                    riskScore: model.riskScore,
+                    cardiacReserve: model.cardiacReserve,
+                    timestamp: Date.now()
+                };
+            }
+        };
+        
+        console.log('%c✅ AI-IV Dashboard initialized', 'color: #4caf50; font-weight: bold');
+        console.log('%cAPI available at window.AIIV', 'color: #88c0d0');
+        console.log('%cExample: window.AIIV.runTests()', 'color: #88c0d0');
     </script>
 </body>
 </html>
