@@ -512,6 +512,123 @@
 
     <script>
         // ========================================================================
+        // PLUGIN SYSTEM
+        // ========================================================================
+        
+        /**
+         * AI-IV Plugin Interface
+         */
+        class AIIVPlugin {
+            name = 'UnnamedPlugin';
+            onInit(ctx) {}
+            onTelemetry(telemetry, ctx) {}
+            onModelComputed(model, ctx) {}
+            onBeforeRender(telemetry, model, ctx) {}
+            onAfterRender(telemetry, model, ctx) {}
+            onError(error, ctx) {}
+        }
+
+        /**
+         * Plugin Manager - Drop-in, production-ready
+         */
+        const PluginManager = (() => {
+            const plugins = [];
+            
+            function register(plugin) {
+                if (!plugin || !plugin.name) {
+                    console.warn('Invalid plugin registration attempt');
+                    return;
+                }
+                plugins.push(plugin);
+                safeCall(plugin.onInit, { phase: 'init' });
+                console.log(`🔌 Plugin loaded: ${plugin.name}`);
+            }
+            
+            function safeCall(fn, ...args) {
+                try {
+                    fn && fn(...args);
+                } catch (err) {
+                    console.error('Plugin error:', err);
+                }
+            }
+            
+            return {
+                register,
+                onTelemetry: (t, ctx) => plugins.forEach(p => safeCall(p.onTelemetry, t, ctx)),
+                onModel: (m, ctx) => plugins.forEach(p => safeCall(p.onModelComputed, m, ctx)),
+                beforeRender: (t, m, ctx) => plugins.forEach(p => safeCall(p.onBeforeRender, t, m, ctx)),
+                afterRender: (t, m, ctx) => plugins.forEach(p => safeCall(p.onAfterRender, t, m, ctx)),
+                onError: (e, ctx) => plugins.forEach(p => safeCall(p.onError, e, ctx)),
+                list: () => plugins.map(p => p.name)
+            };
+        })();
+
+        // ========================================================================
+        // EXAMPLE PLUGINS
+        // ========================================================================
+        
+        /**
+         * Plugin 1: Telemetry Logger - Logs elevated risk scenarios
+         */
+        const LoggingPlugin = {
+            name: 'TelemetryLogger',
+            onModelComputed(model) {
+                if (model.riskScore > 0.5) {
+                    console.warn('[AI-IV] Elevated risk:', model);
+                }
+            }
+        };
+
+        /**
+         * Plugin 2: Session Recorder - Records all telemetry and model data
+         */
+        const RecorderPlugin = {
+            name: 'SessionRecorder',
+            buffer: [],
+            onAfterRender(telemetry, model) {
+                this.buffer.push({
+                    t: Date.now(),
+                    telemetry,
+                    model
+                });
+            },
+            export() {
+                return JSON.stringify(this.buffer, null, 2);
+            },
+            clear() {
+                this.buffer = [];
+            },
+            download() {
+                const data = this.export();
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `aiiv-session-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        };
+
+        /**
+         * Plugin 3: Safety Clamp - Enforces hard limits on infusion rate
+         */
+        const SafetyClampPlugin = {
+            name: 'SafetyClamp',
+            onModelComputed(model) {
+                if (model.infusionRate > 1.4) {
+                    model.infusionRate = 1.4;
+                    console.warn('[AI-IV] Safety clamp applied: infusion rate limited to 1.4 ml/min');
+                }
+            }
+        };
+
+        // Register plugins
+        PluginManager.register(LoggingPlugin);
+        PluginManager.register(RecorderPlugin);
+        PluginManager.register(SafetyClampPlugin);
+
+        // ========================================================================
         // PURE MODEL STEP FUNCTION (NO DOM ACCESS)
         // ========================================================================
         
@@ -927,27 +1044,36 @@
         // ========================================================================
         
         function updateDashboard() {
-            simTime += 0.2; // 200ms increments
-            
-            // 1. Get telemetry (simulated or from C++)
-            const telemetry = simulateTelemetry(simTime);
-            
-            // 2. Compute control step (pure function)
-            const model = computeControlStep(
-                { ...telemetry, simTime },
-                0.2
-            );
-            
-            // 3. Render to UI
-            renderVitals(telemetry);
-            renderControl(model, telemetry);
-            renderRisk(model, telemetry);
-            renderAlerts(model, telemetry);
-            renderSessionTime();
-            
-            // 4. Update charts (every 10 seconds)
-            if (Math.round(simTime * 10) % 100 === 0) {
-                updateCharts(telemetry, model);
+            try {
+                simTime += 0.2; // 200ms increments
+                
+                // 1. Get telemetry (simulated or from C++)
+                const telemetry = simulateTelemetry(simTime);
+                PluginManager.onTelemetry(telemetry, { simTime });
+                
+                // 2. Compute control step (pure function)
+                const model = computeControlStep(
+                    { ...telemetry, simTime },
+                    0.2
+                );
+                PluginManager.onModel(model, { simTime });
+                
+                // 3. Render to UI
+                PluginManager.beforeRender(telemetry, model, { simTime });
+                renderVitals(telemetry);
+                renderControl(model, telemetry);
+                renderRisk(model, telemetry);
+                renderAlerts(model, telemetry);
+                renderSessionTime();
+                PluginManager.afterRender(telemetry, model, { simTime });
+                
+                // 4. Update charts (every 10 seconds)
+                if (Math.round(simTime * 10) % 100 === 0) {
+                    updateCharts(telemetry, model);
+                }
+            } catch (e) {
+                PluginManager.onError(e, { simTime });
+                throw e;
             }
         }
 
