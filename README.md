@@ -42,6 +42,7 @@ An AI-powered, closed-loop IV control framework that:
 ## Key Features
 
 ### 1. Multi-Modal State Estimation
+
 - Nonlinear energy-transfer modeling using sigmoid hydration curves  
 - Exponential penalties for metabolic stress and lactate accumulation  
 - Cardiac reserve estimation with age-adjusted physiological limits  
@@ -49,23 +50,27 @@ An AI-powered, closed-loop IV control framework that:
 - Signal coherence metrics to detect and mitigate sensor noise  
 
 ### 2. Predictive Control
+
 - Forward state prediction with uncertainty awareness  
 - Rolling-window trend analysis  
 - Proactive intervention before critical thresholds are reached  
 
 ### 3. Multi-Layer Safety System
+
 - Infusion-rate bounding (0.1–1.5 ml/min)  
 - Cardiac reserve–based throttling  
 - Rate-of-change limiting to prevent oscillations  
 - Emergency fallback logic with minimum safe infusion guarantees  
 
 ### 4. Adaptive AI Control
+
 - Risk-amplified demand modeling for acute scenarios  
 - Coherence-modulated control gain under noisy conditions  
 - Cardiac reserve feedback to protect cardiovascular function  
 - Smooth infusion trajectories for stability and comfort  
 
 ### 5. Plugin-Based Hardening (v1.0)
+
 - Explicit lifecycle hooks for instrumentation and safety logic  
 - Safe, isolated plugin execution  
 - Deterministic core preserved under extension  
@@ -76,7 +81,7 @@ An AI-powered, closed-loop IV control framework that:
 ## Application Domains
 
 | Domain | Use Case | Impact |
-|------|---------|--------|
+|--------|----------|--------|
 | Critical Care | Dynamic ICU fluid management | Reduced complications, faster recovery |
 | Space Medicine | Astronaut hydration & fatigue control | Mission safety and performance |
 | Military & Disaster Relief | Wearable-integrated field IV systems | Improved survival in austere settings |
@@ -87,51 +92,128 @@ An AI-powered, closed-loop IV control framework that:
 
 ## System Data Flow
 
-**Wearable Sensors**  
-(Hydration, Heart Rate, SpO₂, Temperature, Lactate, Fatigue)  
-
-↓
-
-**State Estimator**  
-- Signal fusion and coherence checks  
-- Nonlinear energy modeling  
-- Cardiac reserve and risk scoring  
-- Predictive trajectory estimation  
-
-↓
-
-**Adaptive AI Controller**  
-- Risk-amplified demand modeling  
-- Coherence-modulated control gain  
-- Multi-objective optimization  
-
-↓
-
-**Safety Monitor**  
-- Volume limits  
-- Cardiac load protection  
-- Rate-of-change constraints  
-- Emergency overrides  
-
-↓
-
-**Infusion Pump Interface**  
+```
+Wearable Sensors
+(Hydration, Heart Rate, SpO₂, Temperature, Lactate, Fatigue)
+          ↓
+State Estimator
+  - Signal fusion and coherence checks
+  - Nonlinear energy modeling
+  - Cardiac reserve and risk scoring
+  - Predictive trajectory estimation
+          ↓
+Adaptive AI Controller
+  - Risk-amplified demand modeling
+  - Coherence-modulated control gain
+  - Multi-objective optimization
+          ↓
+Safety Monitor
+  - Volume limits
+  - Cardiac load protection
+  - Rate-of-change constraints
+  - Emergency overrides
+          ↓
+Infusion Pump Interface
 (0.1–1.5 ml/min, real-time control)
+```
 
 ---
 
 ## Installation and Compilation
 
 ### Prerequisites
+
 - C++17-compatible compiler (GCC ≥7, Clang ≥5, MSVC ≥2017)
 - POSIX threads (pthread)
 
 ### Build Instructions
+
 ```bash
 git clone https://github.com/yourusername/ai-iv-therapy-system.git
 cd ai-iv-therapy-system
 g++ -std=c++17 -pthread -O2 ai_adaptive_iv_therapy_system.cpp -o ai_iv_system
 ./ai_iv_system
+```
 
+### Output Files
 
+- `ai_iv_[timestamp]_system.log` — system events and warnings  
+- `ai_iv_[timestamp]_telemetry.csv` — raw sensor data  
+- `ai_iv_[timestamp]_control.csv` — infusion commands and control rationale  
 
+---
+
+## Simulation and Testing
+
+The default simulation models a **75 kg, 35-year-old patient** undergoing progressive dehydration and metabolic stress.
+
+Simulation scenarios can be modified in the telemetry acquisition layer to emulate:
+
+- Severe dehydration  
+- Hemorrhage  
+- Hypothermia  
+- Compensatory tachycardia or bradycardia  
+
+A deterministic test harness validates system bounds, risk escalation behavior, and cardiac reserve limiting.
+
+---
+
+## Research Status and Validation
+
+**Current Status:** Stable pre-clinical research reference (v1.0)
+
+Clinical deployment requires:
+
+- Regulatory clearance (FDA Class II/III, CE)  
+- Controlled clinical trials  
+- Integration with FDA-cleared infusion pumps and sensors  
+- Medical-grade cybersecurity hardening  
+- EHR and clinical workflow integration  
+
+---
+
+## Development Roadmap (Post–v1.0)
+
+- Advanced state estimation (Kalman and Bayesian filtering)  
+- Controller tuning using ICU datasets  
+- Formal C++ parity implementation  
+- Hardware abstraction layer for infusion pumps  
+- Wearable sensor integration (Bluetooth Low Energy)  
+- Multi-patient simulation framework  
+- Regulatory documentation package  
+
+---
+
+## Scientific Foundations
+
+This system builds on established research in:
+
+- Closed-loop fluid resuscitation  
+- Predictive hemodynamic monitoring  
+- Wearable biosensor fusion  
+- Cellular energy transfer and ATP recovery  
+- Space medicine fluid balance research  
+
+All mathematical models and control laws are documented inline for auditability and reproducibility.
+
+---
+
+## Contributing
+
+This is an open research platform.
+
+Contributions are welcome in:
+
+- Control theory and machine learning  
+- Safety and fault-tolerant systems  
+- Sensor and pump integration  
+- Clinical validation studies  
+- Visualization and analysis tooling  
+
+---
+
+## License
+
+MIT License — open for research, modification, and clinical translation.
+
+© 2025 Don Michael Feeney Jr.
