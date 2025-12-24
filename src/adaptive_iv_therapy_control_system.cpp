@@ -196,6 +196,7 @@ public:
         auto now = std::chrono::steady_clock::now();
         auto elapsed_h = std::chrono::duration<double, std::ratio<3600>>(
             now - last_check).count();
+        last_check = now;
         
         double projected_volume = cumulative_volume_ml + (requested_rate * 60.0 * elapsed_h);
         if (projected_volume > max_volume_24h_ml * 0.9) {
