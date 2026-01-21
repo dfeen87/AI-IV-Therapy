@@ -129,7 +129,7 @@ Infusion Pump Interface
 ### Build Instructions
 
 ```bash
-git clone https://github.com/yourusername/ai-iv-therapy-system.git
+git clone https://github.com/dfeen87/ai-iv-therapy.git
 cd ai-iv-therapy-system
 g++ -std=c++17 -pthread -O2 ai_adaptive_iv_therapy_system.cpp -o ai_iv_system
 ./ai_iv_system
