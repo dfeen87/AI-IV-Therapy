@@ -291,16 +291,17 @@ private:
     // NEW: Calculate flow velocity from cardiac output and infusion rate
     double estimate_flow_velocity(const Telemetry& m, double infusion_rate_ml_min, 
                                    double weight_kg) {
-        // Simplified model: velocity proportional to cardiac output and infusion
+        // Simplified model: velocity proportional to total flow and effective vessel area.
         // Typical blood flow velocity in capillaries: 0.03-0.07 cm/s
         // In larger vessels: 20-40 cm/s
+        double cardiac_flow_ml_s = m.cardiac_output_L_min * 1000.0 / 60.0;
+        double infusion_flow_ml_s = infusion_rate_ml_min / 60.0;
+        double total_flow_ml_s = cardiac_flow_ml_s + infusion_flow_ml_s;
         
-        // Assume weighted average across circulation
-        double cardiac_contribution = m.cardiac_output_L_min * 4.0; // Scale factor
-        double infusion_contribution = infusion_rate_ml_min * 0.5;
-        
-        double v_estimated = (cardiac_contribution + infusion_contribution) / weight_kg;
-        return Utils::clamp(v_estimated, 5.0, 40.0); // Physiological bounds
+        // Approximate effective cross-sectional area scaled by patient size.
+        double effective_area_cm2 = std::max(1.0, weight_kg * 0.5);
+        double v_estimated = total_flow_ml_s / effective_area_cm2;
+        return Utils::clamp(v_estimated, 0.05, 40.0); // Physiological bounds
     }
     
     // NEW: Calculate tissue absorption efficiency based on perfusion state
@@ -334,9 +335,9 @@ private:
                                                double infusion_rate_ml_min,
                                                double weight_kg,
                                                double perfusion_state) {
-        // T(t) = [P_input(t) · G(v, v₀, σ) · ṁ(t) · I_sp · η_tissue] / M_patient
+        // T(t) = [P_input(t) + G(v, v₀, σ) · ṁ(t) · I_sp · η_tissue] / M_patient
         
-        // Total metabolic power input
+        // Total metabolic power input (W)
         double P_input = params.P_baseline + params.P_iv_supplement + params.P_energy_cells;
         
         // Flow velocity and Gaussian optimization
@@ -346,14 +347,15 @@ private:
         // Mass flow rate (convert ml/min to kg/s, assuming density ~1.0)
         double m_dot = infusion_rate_ml_min / 60000.0; // kg/s
         
-        // Specific energy delivery (currently standard IV)
-        double I_sp = params.I_sp_standard;
+        // Specific energy delivery (currently standard IV), convert kJ/kg to J/kg
+        double I_sp = params.I_sp_standard * 1000.0;
         
         // Tissue absorption efficiency
         double eta = calculate_tissue_efficiency(m, params, perfusion_state);
         
-        // Complete energy transfer equation
-        double T_t = (P_input * G_v * m_dot * I_sp * eta) / weight_kg;
+        // Complete energy transfer equation (W/kg)
+        double infusion_power = m_dot * I_sp * eta * G_v; // W
+        double T_t = (P_input + infusion_power) / weight_kg;
         
         return T_t; // Returns W/kg
     }
@@ -490,6 +492,8 @@ public:
         
         predicted.hydration_pct += hydration_trend * minutes_ahead;
         predicted.energy_T += energy_trend * minutes_ahead;
+        predicted.hydration_pct = Utils::clamp(predicted.hydration_pct, 0.0, 100.0);
+        predicted.energy_T = Utils::clamp(predicted.energy_T, 0.0, 1.0);
         
         // Increase uncertainty (5% per minute as per white paper)
         predicted.uncertainty = std::min(1.0, predicted.uncertainty + 0.05 * minutes_ahead);
@@ -626,6 +630,10 @@ public:
         log_file.open(prefix + "_system.log");
         telemetry_file.open(prefix + "_telemetry.csv");
         control_file.open(prefix + "_control.csv");
+        if (!log_file.is_open() || !telemetry_file.is_open() || !control_file.is_open()) {
+            std::cerr << "Warning: Failed to open one or more log files for session "
+                      << session_id << ".\n";
+        }
         
         telemetry_file << "timestamp,hydration_pct,heart_rate_bpm,temp_c,blood_loss_idx,"
                        << "fatigue_idx,anxiety_idx,signal_quality,spo2_pct,lactate_mmol,"
