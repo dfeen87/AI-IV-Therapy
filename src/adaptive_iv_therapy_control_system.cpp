@@ -623,6 +623,10 @@ private:
     std::ofstream log_file;
     std::ofstream telemetry_file;
     std::ofstream control_file;
+    size_t log_flush_counter = 0;
+    size_t telemetry_flush_counter = 0;
+    size_t control_flush_counter = 0;
+    static constexpr size_t kFlushEvery = 25;
     
 public:
     SystemLogger(const std::string& session_id) {
@@ -656,7 +660,9 @@ public:
                        << m.spo2_pct << ","
                        << m.lactate_mmol << ","
                        << m.cardiac_output_L_min << "\n";
-        telemetry_file.flush();
+        if (++telemetry_flush_counter % kFlushEvery == 0) {
+            telemetry_file.flush();
+        }
     }
     
     void log_control(const ControlOutput& out, const PatientState& state,
@@ -672,13 +678,17 @@ public:
                      << state.cardiac_reserve << ","
                      << out.warning_flags << ","
                      << out.rationale << "\n";
-        control_file.flush();
+        if (++control_flush_counter % kFlushEvery == 0) {
+            control_file.flush();
+        }
     }
     
     void log_event(const std::string& event) {
         auto now = std::chrono::steady_clock::now();
         log_file << "[" << Utils::timestamp_str(now) << "] " << event << "\n";
-        log_file.flush();
+        if (++log_flush_counter % kFlushEvery == 0) {
+            log_file.flush();
+        }
     }
     
     ~SystemLogger() {
