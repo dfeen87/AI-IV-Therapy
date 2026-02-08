@@ -1,27 +1,59 @@
-# AI-Optimized Intravenous Therapy Control System
+# AI-Optimized Intravenous Therapy Control System (AI-IV)
+
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
+![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
+![Version](https://img.shields.io/badge/version-v2.2.0-blueviolet)
 
 **License:** MIT  
-**Primary Language:** C++17 (with HTML/JS reference implementation)  
-**Status:** v1.0.0 — Stable Research Reference (Pre-Clinical)
+**Primary Language:** C++17  
+**Supplementary Reference:** HTML / JavaScript (conceptual parity)  
+**Current Status:** v2.2.0 — Stable Pre-Clinical Research System  
 
 ---
 
 ## Overview
 
-This repository contains a **v1.0 stable reference implementation** of an AI-optimized, closed-loop intravenous (IV) therapy control system.
+This repository contains a **production-grade, pre-clinical reference implementation** of an **AI-optimized, closed-loop intravenous (IV) therapy control system**.
 
-The system is designed for **pre-clinical research, simulation, and algorithm validation** across critical care, space medicine, and extreme survival environments. It demonstrates how real-time physiological telemetry, predictive modeling, and layered safety constraints can be combined into a deterministic, auditable control architecture.
+AI-IV demonstrates how **real-time physiological telemetry**, **predictive state modeling**, **deterministic control**, and **layered safety constraints** can be composed into a **fully auditable, safety-first control architecture** suitable for:
 
-This release establishes a **locked core model and plugin extension API** suitable for further research, C++ reimplementation, and integration testing.
+- Critical care research
+- Space and extreme-environment medicine
+- Simulation and algorithm validation
+- Future regulated medical device development
+
+> **Important:**  
+> This software is **not a clinical device**. It is intended exclusively for **research, simulation, and pre-clinical development**.
+
+---
+
+## Design Philosophy
+
+AI-IV is built around four non-negotiable principles:
+
+1. **Determinism First**  
+   Control logic must remain predictable, bounded, and timing-safe.
+
+2. **Safety Is Structural**  
+   Safety constraints are embedded into the control architecture—not bolted on.
+
+3. **Observability Without Coupling**  
+   Monitoring, alerts, and instrumentation must never influence control decisions.
+
+4. **Auditability by Construction**  
+   Every decision, constraint, and fallback is explainable and logged.
 
 ---
 
 ## Problem Statement
 
-Conventional IV therapy relies on static infusion protocols that do not adapt to rapidly changing patient physiology. In high-risk scenarios, this rigidity can result in:
+Traditional IV therapy relies on **static infusion protocols** that fail to adapt to rapidly changing patient physiology.
+
+In high-risk or resource-limited environments, this can lead to:
 
 - Fluid overload or under-resuscitation  
-- Delayed response to physiological deterioration  
+- Delayed recognition of physiological deterioration  
 - Inefficient cellular energy (ATP) recovery  
 - Increased risk of preventable complications  
 
@@ -29,203 +61,213 @@ Conventional IV therapy relies on static infusion protocols that do not adapt to
 
 ## Solution
 
-An AI-powered, closed-loop IV control framework that:
+AI-IV implements an **adaptive, closed-loop IV control framework** that:
 
-- Continuously estimates patient state from multimodal telemetry  
-- Predicts near-term physiological trajectories  
-- Dynamically adapts infusion rates within strict safety bounds  
-- Optimizes metabolic recovery and cellular energy transfer  
-- Separates control logic from visualization and instrumentation  
+- Continuously estimates patient state from multimodal telemetry
+- Predicts near-term physiological trajectories
+- Dynamically adjusts infusion rates within strict safety envelopes
+- Optimizes metabolic recovery and cellular energy transfer
+- Separates control logic from visualization, logging, and alerting
 
 ---
 
-## Key Features
+## Key Capabilities
 
 ### 1. Multi-Modal State Estimation
 
-- Nonlinear energy-transfer modeling using sigmoid hydration curves  
-- Exponential penalties for metabolic stress and lactate accumulation  
-- Cardiac reserve estimation with age-adjusted physiological limits  
-- Composite risk scoring across dehydration, hypoxia, and thermal stress  
-- Signal coherence metrics to detect and mitigate sensor noise  
+- Nonlinear hydration and energy-transfer modeling
+- Exponential penalties for metabolic stress and lactate accumulation
+- Cardiac reserve estimation with physiologically bounded limits
+- Composite risk scoring (hydration, oxygenation, thermal load)
+- Signal coherence checks to detect sensor degradation or noise
+
+---
 
 ### 2. Predictive Control
 
-- Forward state prediction with uncertainty awareness  
-- Rolling-window trend analysis  
-- Proactive intervention before critical thresholds are reached  
+- Forward state prediction with bounded extrapolation
+- Rolling-window trend analysis
+- Early intervention before threshold violations occur
+
+---
 
 ### 3. Multi-Layer Safety System
 
-- Infusion-rate bounding (0.1–1.5 ml/min)  
-- Cardiac reserve–based throttling  
-- Rate-of-change limiting to prevent oscillations  
-- Emergency fallback logic with minimum safe infusion guarantees  
-
-### 4. Adaptive AI Control
-
-- Risk-amplified demand modeling for acute scenarios  
-- Coherence-modulated control gain under noisy conditions  
-- Cardiac reserve feedback to protect cardiovascular function  
-- Smooth infusion trajectories for stability and comfort  
-
-### 5. Plugin-Based Hardening (v1.0)
-
-- Explicit lifecycle hooks for instrumentation and safety logic  
-- Safe, isolated plugin execution  
-- Deterministic core preserved under extension  
-- Examples include logging, session recording, and safety clamping  
+- Hard infusion bounds (e.g. 0.1–1.5 ml/min)
+- Cardiac reserve-based throttling
+- Rate-of-change limiting to prevent oscillation
+- Emergency fallback logic with minimum safe infusion guarantees
 
 ---
 
-## Application Domains
+### 4. Adaptive AI Control Logic
 
-| Domain | Use Case | Impact |
-|--------|----------|--------|
-| Critical Care | Dynamic ICU fluid management | Reduced complications, faster recovery |
-| Space Medicine | Astronaut hydration & fatigue control | Mission safety and performance |
-| Military & Disaster Relief | Wearable-integrated field IV systems | Improved survival in austere settings |
-| Extreme Environments | Post-exertion metabolic recovery | Optimized hydration and ATP replenishment |
-| Emergency Medicine | Pre-hospital resuscitation | Continuous adaptation during transport |
+- Risk-amplified demand modeling for acute conditions
+- Coherence-modulated control gain under noisy telemetry
+- Cardiovascular protection via reserve-aware feedback
+- Smooth, monotonic infusion trajectories
 
 ---
 
-## System Data Flow
+### 5. Production-Safe Observability & Alarm Sync (v2.2.0)
+
+- Structured, machine-ingestable **ALERT NDJSON events**
+- Emitted into existing `*_system.log` streams (log-based ingestion)
+- Stable alert schema (severity, code, source, message, timestamp)
+- No network I/O, no timing impact, no control coupling
+- Compatible with PagerDuty, Opsgenie, ELK, Datadog, etc.
+
+> Alerts are **observational only** — they never influence control behavior.
+
+---
+
+## System Architecture
 
 ```
-Wearable Sensors
-(Hydration, Heart Rate, SpO₂, Temperature, Lactate, Fatigue)
-          ↓
+
+Wearable / Simulated Sensors
+(Hydration, HR, SpO₂, Temp, Lactate, Fatigue)
+↓
 State Estimator
-  - Signal fusion and coherence checks
-  - Nonlinear energy modeling
-  - Cardiac reserve and risk scoring
-  - Predictive trajectory estimation
-          ↓
-Adaptive AI Controller
-  - Risk-amplified demand modeling
-  - Coherence-modulated control gain
-  - Multi-objective optimization
-          ↓
-Safety Monitor
-  - Volume limits
-  - Cardiac load protection
-  - Rate-of-change constraints
-  - Emergency overrides
-          ↓
-Infusion Pump Interface
-(0.1–1.5 ml/min, real-time control)
-```
+
+* Signal fusion & coherence checks
+* Nonlinear energy modeling
+* Cardiac reserve estimation
+* Risk scoring & prediction
+  ↓
+  Adaptive AI Controller
+* Risk-amplified demand modeling
+* Coherence-aware control gain
+* Predictive rate adjustment
+  ↓
+  Safety Monitor
+* Volume limits
+* Cardiac load protection
+* Rate-of-change constraints
+* Emergency overrides
+  ↓
+  Infusion Pump Interface
+  (Deterministic, bounded output)
+
+````
 
 ---
 
-## Installation and Compilation
+## Installation & Compilation
 
 ### Prerequisites
 
-- C++17-compatible compiler (GCC ≥7, Clang ≥5, MSVC ≥2017)
-- POSIX threads (pthread)
+- C++17-compatible compiler  
+  - GCC ≥ 7  
+  - Clang ≥ 5  
+  - MSVC ≥ 2017  
+- POSIX threads (`pthread`)
 
-### Build Instructions
+### Build
 
 ```bash
 git clone https://github.com/dfeen87/ai-iv-therapy.git
-cd ai-iv-therapy-system
-g++ -std=c++17 -pthread -O2 src/adaptive_iv_therapy_control_system.cpp -o ai_iv_system
-./ai_iv_system
-```
-
-### Output Files
-
-- `ai_iv_[timestamp]_system.log` — system events and warnings  
-- `ai_iv_[timestamp]_telemetry.csv` — raw sensor data  
-- `ai_iv_[timestamp]_control.csv` — infusion commands and control rationale  
+cd ai-iv-therapy
+g++ -std=c++17 -O2 -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
+./ai_iv
+````
 
 ---
 
-## Alert Logging (Alarm Sync)
+## Runtime Artifacts
 
-Alert events are emitted as **single-line NDJSON** entries in `*_system.log`, prefixed with `ALERT `. This makes them easy to tail/grep for downstream incident tooling while preserving the existing log stream. See the detailed schema and examples in `docs/alerts.md`.
+AI-IV produces deterministic, append-only artifacts:
 
-**Quick filter:**
+* `ai_iv_[timestamp]_system.log`
+  System events, warnings, and structured ALERT lines
 
-```bash
-tail -F ai_iv_[timestamp]_system.log | rg '^ALERT '
-```
+* `ai_iv_[timestamp]_telemetry.csv`
+  Raw physiological telemetry
 
----
-
-## Simulation and Testing
-
-The default simulation models a **75 kg, 35-year-old patient** undergoing progressive dehydration and metabolic stress.
-
-Simulation scenarios can be modified in the telemetry acquisition layer to emulate:
-
-- Severe dehydration  
-- Hemorrhage  
-- Hypothermia  
-- Compensatory tachycardia or bradycardia  
-
-A deterministic test harness validates system bounds, risk escalation behavior, and cardiac reserve limiting.
+* `ai_iv_[timestamp]_control.csv`
+  Infusion decisions and control rationale
 
 ---
 
-## Research Status and Validation
+## Simulation & Testing
 
-**Current Status:** Stable pre-clinical research reference (v1.0)
+Default simulation models a **75 kg, 35-year-old subject** undergoing progressive dehydration and metabolic stress.
 
-Clinical deployment requires:
+Scenarios can be modified to emulate:
 
-- Regulatory clearance (FDA Class II/III, CE)  
-- Controlled clinical trials  
-- Integration with FDA-cleared infusion pumps and sensors  
-- Medical-grade cybersecurity hardening  
-- EHR and clinical workflow integration  
+* Severe dehydration
+* Hemorrhage
+* Hypothermia
+* Tachycardia or bradycardia
+* Sensor degradation or dropout
+
+A deterministic harness validates:
+
+* Safety bounds
+* Rate-limiting behavior
+* Emergency fallback engagement
+* Alert emission paths
 
 ---
 
-## Development Roadmap (Post–v1.0)
+## Research & Regulatory Status
 
-- Advanced state estimation (Kalman and Bayesian filtering)  
-- Controller tuning using ICU datasets  
-- Formal C++ parity implementation  
-- Hardware abstraction layer for infusion pumps  
-- Wearable sensor integration (Bluetooth Low Energy)  
-- Multi-patient simulation framework  
-- Regulatory documentation package  
+**Current Status:**
+Stable, pre-clinical research and simulation system.
+
+Clinical deployment would require:
+
+* FDA Class II / III clearance or CE marking
+* Controlled clinical trials
+* Integration with certified infusion pumps and sensors
+* Medical-grade cybersecurity hardening
+* EHR and clinical workflow integration
+
+---
+
+## Roadmap
+
+* Bayesian / Kalman-based state estimation
+* Controller tuning using ICU datasets
+* Hardware abstraction for pump vendors
+* BLE wearable sensor integration
+* Multi-patient simulation
+* Formal verification of safety invariants
+* Optional real-time alert streaming (WebSocket) layer
+* Regulatory documentation package
 
 ---
 
 ## Scientific Foundations
 
-This system builds on established research in:
+AI-IV builds on established work in:
 
-- Closed-loop fluid resuscitation  
-- Predictive hemodynamic monitoring  
-- Wearable biosensor fusion  
-- Cellular energy transfer and ATP recovery  
-- Space medicine fluid balance research  
+* Closed-loop fluid resuscitation
+* Predictive hemodynamic monitoring
+* Wearable biosensor fusion
+* Cellular energy transfer & ATP recovery
+* Space medicine fluid balance research
 
-All mathematical models and control laws are documented inline for auditability and reproducibility.
+All equations and control laws are documented inline for auditability.
 
 ---
 
 ## Contributing
 
-This is an open research platform.
+AI-IV is an **open research platform**.
 
 Contributions are welcome in:
 
-- Control theory and machine learning  
-- Safety and fault-tolerant systems  
-- Sensor and pump integration  
-- Clinical validation studies  
-- Visualization and analysis tooling  
+* Control theory & ML
+* Safety-critical systems
+* Sensor & pump integration
+* Simulation & validation
+* Visualization & analysis tooling
 
 ---
 
 ## License
 
-MIT License — open for research, modification, and clinical translation.
+MIT License — open for research, modification, and future clinical translation.
 
-© 2025 Don Michael Feeney Jr.
+© 2025–2026 Don Michael Feeney Jr.
