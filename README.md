@@ -174,6 +174,17 @@ g++ -std=c++17 -O2 -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
 
 ---
 
+## Continuous Integration
+
+AI-IV uses a minimal, safety-aligned CI gate that focuses on deterministic compilation and an alerting smoke test. The workflow:
+
+* Builds the core system with strict warnings (`-Wall -Wextra -Wpedantic`) under C++17.
+* Builds and runs the alert/logging smoke-test variant (`-DAI_IV_ALERT_LOG_TEST`) to verify alert emission paths compile and execute.
+
+CI intentionally does **not** perform performance benchmarks, hardware-in-the-loop checks, network-based validation, or timing-dependent assertions. This scope is appropriate for a safety-critical, pre-clinical system because it verifies build integrity and observability paths without introducing nondeterminism or environmental coupling that could mask control-loop determinism and safety invariants.
+
+---
+
 ## Runtime Artifacts
 
 AI-IV produces deterministic, append-only artifacts:
