@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install C++17 compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++
+
+      - name: Build release binary
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Wpedantic -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
+
+      - name: Build alert smoke-test variant
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Wpedantic -pthread -DAI_IV_ALERT_LOG_TEST src/adaptive_iv_therapy_control_system.cpp -o ai_iv_alert_test
+
+      - name: Run alert smoke-test
+        run: ./ai_iv_alert_test
