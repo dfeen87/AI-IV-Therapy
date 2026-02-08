@@ -154,6 +154,12 @@ public:
             << "." << std::setw(3) << millis;
         return oss.str();
     }
+
+    static long long epoch_ms() {
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+        return static_cast<long long>(ms);
+    }
 };
 
 // ============================================================================
@@ -618,6 +624,23 @@ public:
 // LOGGING AND MONITORING
 // ============================================================================
 
+enum class AlertSeverity {
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Critical
+};
+
+struct AlertEvent {
+    long long timestamp_ms;
+    AlertSeverity severity;
+    std::string source;
+    std::string code;
+    std::string message;
+    std::optional<std::string> context_json;
+};
+
 class SystemLogger {
 private:
     std::ofstream log_file;
@@ -627,6 +650,59 @@ private:
     size_t telemetry_flush_counter = 0;
     size_t control_flush_counter = 0;
     static constexpr size_t kFlushEvery = 25;
+
+    static std::string severity_to_string(AlertSeverity severity) {
+        switch (severity) {
+            case AlertSeverity::Debug: return "DEBUG";
+            case AlertSeverity::Info: return "INFO";
+            case AlertSeverity::Warn: return "WARN";
+            case AlertSeverity::Error: return "ERROR";
+            case AlertSeverity::Critical: return "CRITICAL";
+        }
+        return "INFO";
+    }
+
+    static std::string escape_json_string(const std::string& input) {
+        std::ostringstream oss;
+        for (char c : input) {
+            switch (c) {
+                case '\\': oss << "\\\\"; break;
+                case '"': oss << "\\\""; break;
+                case '\n': oss << "\\n"; break;
+                case '\r': oss << "\\r"; break;
+                case '\t': oss << "\\t"; break;
+                default:
+                    if (static_cast<unsigned char>(c) < 0x20) {
+                        oss << "\\u"
+                            << std::hex << std::setw(4) << std::setfill('0')
+                            << static_cast<int>(static_cast<unsigned char>(c))
+                            << std::dec << std::setfill(' ');
+                    } else {
+                        oss << c;
+                    }
+            }
+        }
+        return oss.str();
+    }
+
+    void log_alert_event(const AlertEvent& event) {
+        log_file << "ALERT {\"timestamp\":" << event.timestamp_ms
+                 << ",\"severity\":\"" << severity_to_string(event.severity) << "\""
+                 << ",\"source\":\"" << escape_json_string(event.source) << "\""
+                 << ",\"code\":\"" << escape_json_string(event.code) << "\""
+                 << ",\"message\":\"" << escape_json_string(event.message) << "\"";
+        if (event.context_json && !event.context_json->empty()) {
+            log_file << ",\"context\":" << *event.context_json;
+        }
+        log_file << "}\n";
+
+        if (++log_flush_counter % kFlushEvery == 0) {
+            log_file.flush();
+        }
+        if (event.severity == AlertSeverity::Critical) {
+            log_file.flush();
+        }
+    }
     
 public:
     SystemLogger(const std::string& session_id) {
@@ -690,6 +766,22 @@ public:
             log_file.flush();
         }
     }
+
+    void log_alert(AlertSeverity severity,
+                   const std::string& source,
+                   const std::string& code,
+                   const std::string& message,
+                   const std::optional<std::string>& context_json = std::nullopt) {
+        AlertEvent event{
+            Utils::epoch_ms(),
+            severity,
+            source,
+            code,
+            message,
+            context_json
+        };
+        log_alert_event(event);
+    }
     
     ~SystemLogger() {
         log_file.close();
@@ -747,6 +839,74 @@ public:
             // 5. Logging
             logger.log_telemetry(measurement);
             logger.log_control(command, state, measurement.timestamp);
+
+            if (measurement.signal_quality < 0.6) {
+                logger.log_alert(
+                    AlertSeverity::Warn,
+                    "Telemetry",
+                    "SENSOR_QUALITY_LOW",
+                    "Telemetry signal quality below threshold",
+                    std::string("{\"signal_quality\":") +
+                        std::to_string(measurement.signal_quality) +
+                        ",\"threshold\":0.6}");
+            }
+
+            if (!command.warning_flags.empty()) {
+                if (has_warning_flag(command.warning_flags, "VOLUME_LIMIT_APPROACH")) {
+                    logger.log_alert(
+                        AlertSeverity::Warn,
+                        "SafetyMonitor",
+                        "VOLUME_LIMIT_APPROACH",
+                        "Projected volume approaching 24h limit",
+                        std::string("{\"cumulative_volume_ml\":") +
+                            std::to_string(safety.get_cumulative_volume()) + "}");
+                }
+                if (has_warning_flag(command.warning_flags, "LOW_CARDIAC_RESERVE")) {
+                    logger.log_alert(
+                        AlertSeverity::Warn,
+                        "SafetyMonitor",
+                        "LOW_CARDIAC_RESERVE",
+                        "Cardiac reserve below minimum threshold",
+                        std::string("{\"cardiac_reserve\":") +
+                            std::to_string(state.cardiac_reserve) + "}");
+                }
+                if (has_warning_flag(command.warning_flags, "RATE_CHANGE_LIMITED")) {
+                    logger.log_alert(
+                        AlertSeverity::Info,
+                        "SafetyMonitor",
+                        "RATE_CHANGE_LIMITED",
+                        "Infusion rate change limited by safety constraints",
+                        std::string("{\"infusion_rate_ml_min\":") +
+                            std::to_string(command.infusion_ml_per_min) + "}");
+                }
+                if (has_warning_flag(command.warning_flags, "HIGH_RISK_STATE")) {
+                    logger.log_alert(
+                        AlertSeverity::Warn,
+                        "SafetyMonitor",
+                        "HIGH_RISK_STATE",
+                        "Risk score exceeded threshold",
+                        std::string("{\"risk_score\":") +
+                            std::to_string(state.risk_score) + "}");
+                }
+                if (has_warning_flag(command.warning_flags, "TACHYCARDIA_DETECTED")) {
+                    logger.log_alert(
+                        AlertSeverity::Warn,
+                        "SafetyMonitor",
+                        "TACHYCARDIA_DETECTED",
+                        "Tachycardia detected",
+                        std::string("{\"heart_rate_bpm\":") +
+                            std::to_string(state.heart_rate_bpm) + "}");
+                }
+                if (has_warning_flag(command.warning_flags, "EMERGENCY_MIN_RATE")) {
+                    logger.log_alert(
+                        AlertSeverity::Critical,
+                        "SafetyMonitor",
+                        "EMERGENCY_MIN_RATE",
+                        "Emergency minimum infusion rate enforced",
+                        std::string("{\"hydration_pct\":") +
+                            std::to_string(state.hydration_pct) + "}");
+                }
+            }
             
             // 6. Display status
             display_status(state, command);
@@ -771,6 +931,10 @@ public:
     }
     
 private:
+    static bool has_warning_flag(const std::string& flags, const std::string& token) {
+        return flags.find(token) != std::string::npos;
+    }
+
     Telemetry acquire_telemetry() {
         // SIMULATION: Replace with actual sensor interface
         static double sim_time = 0.0;
@@ -832,6 +996,7 @@ private:
 // MAIN ENTRY POINT
 // ============================================================================
 
+#ifndef AI_IV_ALERT_LOG_TEST
 int main() {
     std::cout << "╔════════════════════════════════════════════════════════════╗\n";
     std::cout << "║  AI-IV Control System v2.0 - Enhanced Energy Transfer     ║\n";
@@ -894,3 +1059,33 @@ int main() {
     
     return 0;
 }
+#else
+int main() {
+    const std::string session_id = "alert_test";
+    {
+        SystemLogger logger(session_id);
+        logger.log_alert(
+            AlertSeverity::Critical,
+            "AlertTest",
+            "ALERT_EMIT_TEST",
+            "Alert emission smoke test",
+            std::string("{\"sample\":true}"));
+    }
+
+    std::ifstream log_stream("ai_iv_" + session_id + "_system.log");
+    std::string line;
+    if (!std::getline(log_stream, line)) {
+        return 1;
+    }
+    if (line.rfind("ALERT ", 0) != 0) {
+        return 2;
+    }
+    if (line.find("\"severity\"") == std::string::npos ||
+        line.find("\"source\"") == std::string::npos ||
+        line.find("\"code\"") == std::string::npos ||
+        line.find("\"message\"") == std::string::npos) {
+        return 3;
+    }
+    return 0;
+}
+#endif
