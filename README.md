@@ -131,7 +131,7 @@ Infusion Pump Interface
 ```bash
 git clone https://github.com/dfeen87/ai-iv-therapy.git
 cd ai-iv-therapy-system
-g++ -std=c++17 -pthread -O2 ai_adaptive_iv_therapy_system.cpp -o ai_iv_system
+g++ -std=c++17 -pthread -O2 src/adaptive_iv_therapy_control_system.cpp -o ai_iv_system
 ./ai_iv_system
 ```
 
@@ -140,6 +140,18 @@ g++ -std=c++17 -pthread -O2 ai_adaptive_iv_therapy_system.cpp -o ai_iv_system
 - `ai_iv_[timestamp]_system.log` — system events and warnings  
 - `ai_iv_[timestamp]_telemetry.csv` — raw sensor data  
 - `ai_iv_[timestamp]_control.csv` — infusion commands and control rationale  
+
+---
+
+## Alert Logging (Alarm Sync)
+
+Alert events are emitted as **single-line NDJSON** entries in `*_system.log`, prefixed with `ALERT `. This makes them easy to tail/grep for downstream incident tooling while preserving the existing log stream. See the detailed schema and examples in `docs/alerts.md`.
+
+**Quick filter:**
+
+```bash
+tail -F ai_iv_[timestamp]_system.log | rg '^ALERT '
+```
 
 ---
 
