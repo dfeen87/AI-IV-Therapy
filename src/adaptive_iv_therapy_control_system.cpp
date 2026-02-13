@@ -21,23 +21,24 @@
 #include <algorithm>
 #include <optional>
 #include <thread>
+#include <atomic>
 
 // ============================================================================
 // CORE DATA STRUCTURES
 // ============================================================================
 
 struct Telemetry {
-    std::chrono::steady_clock::time_point timestamp;
-    double hydration_pct;      // 0-100: body water percentage
-    double heart_rate_bpm;     // beats per minute
-    double temp_celsius;       // core body temperature
-    double blood_loss_idx;     // 0-1: cumulative blood loss estimate
-    double fatigue_idx;        // 0-1: muscular/metabolic fatigue
-    double anxiety_idx;        // 0-1: stress/anxiety level
-    double signal_quality;     // 0-1: sensor reliability metric
-    double spo2_pct;          // 0-100: blood oxygen saturation
-    double lactate_mmol;      // blood lactate concentration
-    double cardiac_output_L_min;  // NEW: measured/estimated cardiac output
+    std::chrono::steady_clock::time_point timestamp = std::chrono::steady_clock::now();
+    double hydration_pct = 0.0;      // 0-100: body water percentage
+    double heart_rate_bpm = 0.0;     // beats per minute
+    double temp_celsius = 0.0;       // core body temperature
+    double blood_loss_idx = 0.0;     // 0-1: cumulative blood loss estimate
+    double fatigue_idx = 0.0;        // 0-1: muscular/metabolic fatigue
+    double anxiety_idx = 0.0;        // 0-1: stress/anxiety level
+    double signal_quality = 0.0;     // 0-1: sensor reliability metric
+    double spo2_pct = 0.0;          // 0-100: blood oxygen saturation
+    double lactate_mmol = 0.0;      // blood lactate concentration
+    double cardiac_output_L_min = 0.0;  // NEW: measured/estimated cardiac output
 };
 
 struct EnergyTransferParams {
@@ -139,6 +140,7 @@ public:
     
     // NEW: Gaussian function for velocity optimization
     static double gaussian(double x, double center, double sigma) {
+        if (sigma <= 0.0) return 0.0;  // Prevent division by zero
         double z = (x - center) / sigma;
         return std::exp(-0.5 * z * z);
     }
@@ -283,7 +285,8 @@ private:
         
         if (telemetry_history.size() >= 5) {
             double hr_variance = 0.0;
-            for (size_t i = telemetry_history.size() - 5; i < telemetry_history.size(); ++i) {
+            size_t start_idx = telemetry_history.size() - 5;
+            for (size_t i = start_idx; i < telemetry_history.size(); ++i) {
                 hr_variance += std::pow(telemetry_history[i].heart_rate_bpm - m.heart_rate_bpm, 2);
             }
             hr_variance /= 5.0;
@@ -491,10 +494,11 @@ public:
         PatientState predicted = history.back();
         
         // Linear extrapolation with uncertainty growth
+        size_t history_idx = history.size() - 5;
         double hydration_trend = (history.back().hydration_pct - 
-                                 history[history.size()-5].hydration_pct) / 5.0;
+                                 history[history_idx].hydration_pct) / 5.0;
         double energy_trend = (history.back().energy_T - 
-                              history[history.size()-5].energy_T) / 5.0;
+                              history[history_idx].energy_T) / 5.0;
         
         predicted.hydration_pct += hydration_trend * minutes_ahead;
         predicted.energy_T += energy_trend * minutes_ahead;
@@ -711,8 +715,7 @@ public:
         telemetry_file.open(prefix + "_telemetry.csv");
         control_file.open(prefix + "_control.csv");
         if (!log_file.is_open() || !telemetry_file.is_open() || !control_file.is_open()) {
-            std::cerr << "Warning: Failed to open one or more log files for session "
-                      << session_id << ".\n";
+            throw std::runtime_error("Failed to open one or more log files for session " + session_id);
         }
         
         telemetry_file << "timestamp,hydration_pct,heart_rate_bpm,temp_c,blood_loss_idx,"
@@ -802,7 +805,7 @@ private:
     SafetyMonitor safety;
     SystemLogger logger;
     
-    bool running;
+    std::atomic<bool> running;
     double current_infusion_rate;
     const std::chrono::milliseconds control_period{200};  // 5 Hz
     
@@ -1026,6 +1029,16 @@ int main() {
     std::cout << "  Age: " << patient.age_years << " years\n";
     std::cout << "  Baseline HR: " << patient.baseline_hr_bpm << " bpm\n";
     std::cout << "  Max Infusion Rate: " << patient.max_safe_infusion_rate << " ml/min\n\n";
+    
+    // Validate patient parameters
+    if (patient.weight_kg <= 0.0) {
+        std::cerr << "Error: Invalid patient weight (" << patient.weight_kg << " kg)\n";
+        return 1;
+    }
+    if (patient.age_years <= 0.0) {
+        std::cerr << "Error: Invalid patient age (" << patient.age_years << " years)\n";
+        return 1;
+    }
     
     std::cout << "Energy Transfer Parameters:\n";
     std::cout << "  P_baseline: " << patient.energy_params.P_baseline << " W\n";
