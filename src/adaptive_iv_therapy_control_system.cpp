@@ -1032,11 +1032,13 @@ int main() {
     
     // Validate patient parameters
     if (patient.weight_kg <= 0.0) {
-        std::cerr << "Error: Invalid patient weight (" << patient.weight_kg << " kg)\n";
+        std::cerr << "Error: Patient weight must be positive (got " 
+                  << patient.weight_kg << " kg)\n";
         return 1;
     }
     if (patient.age_years <= 0.0) {
-        std::cerr << "Error: Invalid patient age (" << patient.age_years << " years)\n";
+        std::cerr << "Error: Patient age must be positive (got " 
+                  << patient.age_years << " years)\n";
         return 1;
     }
     
