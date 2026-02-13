@@ -1,0 +1,23 @@
+# Compiled binaries
+ai_iv
+ai_iv_alert_test
+
+# Log files
+*.log
+*.csv
+
+# Build artifacts
+*.o
+*.out
+*.exe
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
