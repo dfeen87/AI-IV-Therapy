@@ -22,6 +22,14 @@
 #include <optional>
 #include <thread>
 #include <atomic>
+#include <memory>
+
+// REST API Server (optional - enable with -DENABLE_REST_API flag)
+#ifdef ENABLE_REST_API
+#define TELEMETRY_DEFINED
+#define PATIENT_STATE_DEFINED
+#include "rest_api_server.hpp"
+#endif
 
 // ============================================================================
 // CORE DATA STRUCTURES
@@ -809,6 +817,10 @@ private:
     double current_infusion_rate;
     const std::chrono::milliseconds control_period{200};  // 5 Hz
     
+#ifdef ENABLE_REST_API
+    std::unique_ptr<RestApiServer> rest_api;
+#endif
+    
 public:
     AIIVSystem(const PatientProfile& prof, const std::string& session_id)
         : profile(prof), controller(prof), safety(prof), logger(session_id), 
@@ -818,11 +830,33 @@ public:
                         std::to_string(prof.age_years) + "y");
         logger.log_event("Optimal flow velocity: " + 
                         std::to_string(prof.energy_params.v_optimal_cm_s) + " cm/s");
+        
+#ifdef ENABLE_REST_API
+        // Initialize REST API server on port 8080
+        rest_api = std::make_unique<RestApiServer>(8080, "0.0.0.0");
+        
+        // Set initial configuration
+        std::map<std::string, std::string> config;
+        config["patient_weight_kg"] = std::to_string(prof.weight_kg);
+        config["patient_age_years"] = std::to_string(prof.age_years);
+        config["max_infusion_rate"] = std::to_string(prof.max_safe_infusion_rate);
+        config["baseline_hr_bpm"] = std::to_string(prof.baseline_hr_bpm);
+        config["session_id"] = session_id;
+        rest_api->update_config(config);
+        
+        logger.log_event("REST API initialized on port 8080");
+#endif
     }
     
     void start() {
         running = true;
         logger.log_event("Control loop started");
+        
+#ifdef ENABLE_REST_API
+        if (rest_api && rest_api->start()) {
+            logger.log_event("REST API server started on port 8080");
+        }
+#endif
         
         auto next_tick = std::chrono::steady_clock::now();
         
@@ -843,6 +877,15 @@ public:
             logger.log_telemetry(measurement);
             logger.log_control(command, state, measurement.timestamp);
 
+#ifdef ENABLE_REST_API
+            // Update REST API with current data
+            if (rest_api) {
+                rest_api->update_telemetry(measurement);
+                rest_api->update_patient_state(state);
+                rest_api->update_control_output(command.infusion_ml_per_min, command.rationale);
+            }
+#endif
+
             if (measurement.signal_quality < 0.6) {
                 logger.log_alert(
                     AlertSeverity::Warn,
@@ -852,6 +895,11 @@ public:
                     std::string("{\"signal_quality\":") +
                         std::to_string(measurement.signal_quality) +
                         ",\"threshold\":0.6}");
+#ifdef ENABLE_REST_API
+                if (rest_api) {
+                    rest_api->add_alert("warning", "Telemetry signal quality below threshold");
+                }
+#endif
             }
 
             if (!command.warning_flags.empty()) {
@@ -931,6 +979,13 @@ public:
     
     void stop() {
         running = false;
+        
+#ifdef ENABLE_REST_API
+        if (rest_api) {
+            rest_api->stop();
+            logger.log_event("REST API server stopped");
+        }
+#endif
     }
     
 private:
