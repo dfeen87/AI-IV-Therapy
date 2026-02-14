@@ -121,6 +121,20 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 
 ---
 
+### 6. REST API for Global Network Access (Optional)
+
+- Real-time HTTP API for remote monitoring and telemetry access
+- JSON endpoints for status, telemetry, control state, and alerts
+- Thread-safe, non-blocking operation (zero impact on control loop)
+- Read-only design (GET endpoints only for safety)
+- Global network binding (0.0.0.0:8080) for remote access
+- Historical data buffering (last 1000 telemetry samples)
+- CORS-enabled for web dashboard integration
+
+> Enabled with `-DENABLE_REST_API` compile flag. See [REST API Documentation](docs/REST_API.md).
+
+---
+
 ## System Architecture
 
 ```
@@ -165,12 +179,24 @@ State Estimator
 
 ### Build
 
+**Standard Build:**
 ```bash
 git clone https://github.com/dfeen87/ai-iv-therapy.git
 cd ai-iv-therapy
 g++ -std=c++17 -O2 -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
 ./ai_iv
-````
+```
+
+**Build with REST API (Global Network Access):**
+```bash
+g++ -std=c++17 -O2 -pthread -DENABLE_REST_API \
+    src/adaptive_iv_therapy_control_system.cpp \
+    src/rest_api_server.cpp \
+    -o ai_iv
+./ai_iv
+```
+
+When built with REST API support, the system exposes real-time telemetry, state, and control data via HTTP on port 8080. See [REST API Documentation](docs/REST_API.md) for details.
 
 ---
 
