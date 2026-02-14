@@ -1,6 +1,8 @@
 # Compiled binaries
 ai_iv
 ai_iv_alert_test
+ai_iv_test
+ai_iv_with_api
 
 # Log files
 *.log

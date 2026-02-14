@@ -26,3 +26,15 @@ jobs:
 
       - name: Run alert smoke-test
         run: ./ai_iv_alert_test
+
+      - name: Build with REST API support
+        run: |
+          g++ -std=c++17 -Wall -Wextra -Wpedantic -pthread -DENABLE_REST_API \
+            src/adaptive_iv_therapy_control_system.cpp \
+            src/rest_api_server.cpp \
+            -o ai_iv_with_api
+
+      - name: Verify REST API binary
+        run: |
+          test -f ai_iv_with_api
+          echo "REST API build successful"
