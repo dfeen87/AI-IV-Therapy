@@ -54,3 +54,22 @@ jobs:
         run: |
           test -f ai_iv_with_api
           echo "REST API build successful"
+
+      - name: Build and run unit tests
+        run: |
+          g++ -std=c++17 -Wall -Wextra -pthread -I src \
+            tests/test_safety_monitor.cpp \
+            src/SystemLogger.cpp \
+            src/SafetyMonitor.cpp \
+            src/StateEstimator.cpp \
+            src/AdaptiveController.cpp \
+            -o test_safety_monitor
+          g++ -std=c++17 -Wall -Wextra -pthread -I src \
+            tests/test_state_estimator.cpp \
+            src/SystemLogger.cpp \
+            src/SafetyMonitor.cpp \
+            src/StateEstimator.cpp \
+            src/AdaptiveController.cpp \
+            -o test_state_estimator
+          ./test_safety_monitor
+          ./test_state_estimator

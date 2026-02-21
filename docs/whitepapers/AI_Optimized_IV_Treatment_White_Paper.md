@@ -124,7 +124,7 @@ Modern wearables provide continuous, non-invasive monitoring of:
 
 Modern microcontrollers enable real-time execution of complex algorithms:
 - ARM Cortex-M7 processors: 400+ MHz, sufficient for Kalman filtering and control
-- TensorFlow Lite: Neural network inference in <10ms
+- TensorFlow Lite: Neural network inference in <10ms *(future integration — not used in current implementation)*
 - Low power consumption: <100mW for continuous operation
 
 #### 2.2.3 Smart Infusion Pumps
@@ -522,6 +522,13 @@ If H < 50% and all other constraints would yield u < 0.1:
 
 ## 7. Simulation Results
 
+> **Note:** The results in this section are design-study projections generated from
+> a parameterised physiological model during early system design. They are intended
+> to illustrate expected system behaviour and motivate the control approach. The
+> simulation harness used to produce these results is not yet included in the
+> repository. Results should not be cited as experimentally validated outcomes
+> until a reproducible simulation framework is released alongside the data.
+
 ### 7.1 Simulation Framework
 
 **Patient cohort:** 1000 virtual patients with varied profiles
@@ -785,7 +792,7 @@ If H < 50% and all other constraints would yield u < 0.1:
 │     Middleware Layer                    │
 │  - Sensor Fusion Library                │
 │  - Kalman Filter (optional)             │
-│  - TensorFlow Lite (ML inference)       │
+│  - TensorFlow Lite (ML inference) [future] │
 │  - Data Logger                          │
 └────────────┬────────────────────────────┘
              │

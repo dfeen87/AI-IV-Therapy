@@ -111,9 +111,8 @@ double StateEstimator::calculate_metabolic_load(const Telemetry& m) {
                        0.25*lactate_stress + 0.2*anxiety_stress, 0.0, 1.0);
 }
 
-double StateEstimator::calculate_cardiac_reserve(const Telemetry& m, double baseline_hr) {
-    double age_estimate = (220.0 - baseline_hr) / 0.7;
-    double max_predicted_hr = 220.0 - age_estimate;
+double StateEstimator::calculate_cardiac_reserve(const Telemetry& m, double age_years) {
+    double max_predicted_hr = 220.0 - age_years;  // Standard HRmax = 220 - age
     double current_percentage = m.heart_rate_bpm / max_predicted_hr;
 
     double reserve = 1.0 - Utils::sigmoid(current_percentage, 0.85, 10.0);
@@ -161,7 +160,7 @@ PatientState StateEstimator::estimate(const Telemetry& m, const PatientProfile& 
         profile.energy_params.sigma_velocity);
 
     state.metabolic_load = calculate_metabolic_load(m);
-    state.cardiac_reserve = calculate_cardiac_reserve(m, profile.baseline_hr_bpm);
+    state.cardiac_reserve = calculate_cardiac_reserve(m, profile.age_years);
     state.risk_score = calculate_risk_score(m, state.energy_T);
 
     state.uncertainty = 1.0 - (state.coherence_sigma * (1.0 - 0.3*state.metabolic_load));

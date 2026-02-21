@@ -43,6 +43,11 @@ constexpr double MIN_CARDIAC_RESERVE = 0.2;
 constexpr double CARDIAC_LIMIT_THRESHOLD = 0.3;
 
 // -----------------------------
+// Rate-of-Change Safety
+// -----------------------------
+constexpr double MAX_RATE_CHANGE_ML_MIN = 0.3;  // ml/min per control cycle
+
+// -----------------------------
 // Energy Transfer Model
 // -----------------------------
 constexpr double BASELINE_METABOLIC_POWER_W = 100.0;

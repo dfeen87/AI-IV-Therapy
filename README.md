@@ -3,12 +3,12 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
-![Version](https://img.shields.io/badge/version-v2.2.0-blueviolet)
+![Version](https://img.shields.io/badge/version-v4.0.0-blueviolet)
 
 **License:** MIT  
 **Primary Language:** C++17  
 **Supplementary Reference:** HTML / JavaScript (conceptual parity)  
-**Current Status:** v2.2.0 — Stable Pre-Clinical Research System  
+**Current Status:** v4.0.0 — Stable Pre-Clinical Research System  
 
 ---
 
@@ -100,12 +100,17 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 
 ---
 
-### 4. Adaptive AI Control Logic
+### 4. Adaptive Control Logic
 
 - Risk-amplified demand modeling for acute conditions
 - Coherence-modulated control gain under noisy telemetry
 - Cardiovascular protection via reserve-aware feedback
 - Smooth, monotonic infusion trajectories
+
+> **Note on the "AI" name:** The current control implementation is a deterministic,
+> rule-based nonlinear controller — sigmoid and Gaussian functions with hand-tuned weights.
+> No machine learning or trained models are used. ML-based enhancements (deep RL controller,
+> CNN sensor fusion) are planned future work described in the white paper (Section 10.2).
 
 ---
 
