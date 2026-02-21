@@ -12,6 +12,7 @@
 #ifndef REST_API_SERVER_HPP
 #define REST_API_SERVER_HPP
 
+#include "iv_system_types.hpp"
 #include <string>
 #include <thread>
 #include <atomic>
@@ -26,10 +27,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-// Forward declarations for data structures
-struct Telemetry;
-struct PatientState;
-
 class RestApiServer {
 public:
     RestApiServer(int port = 8080, const std::string& bind_address = "0.0.0.0");
@@ -41,8 +38,8 @@ public:
     bool is_running() const { return running_.load(); }
     
     // Data update methods (called from main control loop)
-    void update_telemetry(const Telemetry& telemetry);
-    void update_patient_state(const PatientState& state);
+    void update_telemetry(const ivsys::Telemetry& telemetry);
+    void update_patient_state(const ivsys::PatientState& state);
     void update_control_output(double infusion_rate, const std::string& rationale);
     void add_alert(const std::string& severity, const std::string& message);
     void update_config(const std::map<std::string, std::string>& config);

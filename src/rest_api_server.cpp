@@ -9,29 +9,6 @@
 #include <algorithm>
 #include <iostream>
 
-// Minimal telemetry and state structure definitions for compilation
-// These will be properly linked when integrated with main system
-#ifndef TELEMETRY_DEFINED
-struct Telemetry {
-    double hydration_pct;
-    double heart_rate_bpm;
-    double temp_celsius;
-    double spo2_pct;
-    double lactate_mmol;
-    double cardiac_output_L_min;
-};
-#endif
-
-#ifndef PATIENT_STATE_DEFINED
-struct PatientState {
-    double hydration_pct;
-    double energy_T;
-    double metabolic_load;
-    double cardiac_reserve;
-    double risk_score;
-};
-#endif
-
 RestApiServer::RestApiServer(int port, const std::string& bind_address)
     : port_(port), bind_address_(bind_address), server_socket_(-1), running_(false) {
     
@@ -332,7 +309,7 @@ std::string RestApiServer::handle_config() {
     return json.str();
 }
 
-void RestApiServer::update_telemetry(const Telemetry& telemetry) {
+void RestApiServer::update_telemetry(const ivsys::Telemetry& telemetry) {
     std::lock_guard<std::mutex> lock(data_mutex_);
     
     TelemetrySnapshot snapshot;
@@ -353,7 +330,7 @@ void RestApiServer::update_telemetry(const Telemetry& telemetry) {
     }
 }
 
-void RestApiServer::update_patient_state(const PatientState& state) {
+void RestApiServer::update_patient_state(const ivsys::PatientState& state) {
     std::lock_guard<std::mutex> lock(data_mutex_);
     
     current_state_.hydration_pct = state.hydration_pct;
