@@ -124,7 +124,8 @@ Modern wearables provide continuous, non-invasive monitoring of:
 
 Modern microcontrollers enable real-time execution of complex algorithms:
 - ARM Cortex-M7 processors: 400+ MHz, sufficient for Kalman filtering and control
-- TensorFlow Lite: Neural network inference in <10ms *(future integration — not used in current implementation)*
+- TensorFlow Lite: Neural network inference in <10ms — **implemented** (see
+  `models/sensor_fusion.tflite` and `src/NeuralStateEstimator.hpp`)
 - Low power consumption: <100mW for continuous operation
 
 #### 2.2.3 Smart Infusion Pumps
@@ -792,7 +793,7 @@ If H < 50% and all other constraints would yield u < 0.1:
 │     Middleware Layer                    │
 │  - Sensor Fusion Library                │
 │  - Kalman Filter (optional)             │
-│  - TensorFlow Lite (ML inference) [future] │
+│  - frugally-deep / TFLite (ML inference)│
 │  - Data Logger                          │
 └────────────┬────────────────────────────┘
              │
@@ -995,7 +996,24 @@ Wearable Device ──[BLE]──> Mobile App ──[HTTPS]──> Cloud Backend
 
 ### 10.2 Machine Learning Enhancements
 
-#### 10.2.1 Deep Reinforcement Learning Controller
+#### 10.2.1 Sensor Fusion Neural Network — **Implemented in v4.1**
+
+A feedforward neural network (`sensor_fusion_energy`) has been trained and
+integrated into the codebase:
+
+- **Architecture**: Input(5) → Dense-16 ReLU → Dense-8 ReLU → Dense-1 Sigmoid
+- **Parameters**: 241 (< 1 KB weights)
+- **Training**: TensorFlow/Keras knowledge distillation from the hand-crafted
+  `calculate_energy_proxy` formula; 10,000 synthetic samples; val MAE < 0.02
+- **Runtime**: frugally-deep (C++17, header-only; no TFLite C++ library required)
+- **Interchange**: `models/sensor_fusion.tflite` exported for embedded / mobile use
+- **Build flag**: `-DENABLE_NEURAL_ESTIMATOR`
+- **Script**: `tools/train_sensor_fusion_model.py`
+
+The model replaces the hand-crafted energy proxy with a learned approximation.
+It can be retrained on real patient data when clinical datasets become available.
+
+#### 10.2.2 Deep Reinforcement Learning Controller — **Future Work**
 
 **Current limitation:** Rule-based control law, though effective, may be suboptimal for complex multivariable scenarios.
 
@@ -1024,7 +1042,7 @@ Wearable Device ──[BLE]──> Mobile App ──[HTTPS]──> Cloud Backend
 - Personalization: Adapt to individual patient response patterns
 - Rare event handling: Better response to combinations not in training data
 
-#### 10.2.2 Sensor Fusion Neural Network
+#### 10.2.3 Sensor Fusion Neural Network — **Superseded by 10.2.1**
 
 **Current limitation:** Linear combination of sensor inputs; may miss complex patterns.
 

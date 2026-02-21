@@ -129,7 +129,10 @@ The controller is:
 - Biased toward physiological stability
 - Explicitly bounded
 
-No learning-based policy optimization is used at this stage.
+The default build uses a deterministic rule-based control law.  When compiled
+with `-DENABLE_NEURAL_ESTIMATOR`, the energy-proxy term (`E_T`) is computed by
+a neural network loaded via `NeuralStateEstimator` (frugally-deep runtime).
+End-to-end ML policy optimisation is not yet implemented.
 
 ---
 

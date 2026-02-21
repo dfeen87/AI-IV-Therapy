@@ -106,11 +106,13 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 - Coherence-modulated control gain under noisy telemetry
 - Cardiovascular protection via reserve-aware feedback
 - Smooth, monotonic infusion trajectories
+- **Neural energy estimator** — 241-parameter feedforward network trained with TensorFlow/Keras,
+  loaded at runtime via `frugally-deep` (enabled with `-DENABLE_NEURAL_ESTIMATOR`)
 
-> **Note on the "AI" name:** The current control implementation is a deterministic,
-> rule-based nonlinear controller — sigmoid and Gaussian functions with hand-tuned weights.
-> No machine learning or trained models are used. ML-based enhancements (deep RL controller,
-> CNN sensor fusion) are planned future work described in the white paper (Section 10.2).
+> **About the "AI" in this project:** the default build uses a deterministic rule-based
+> nonlinear controller. Building with `-DENABLE_NEURAL_ESTIMATOR` swaps in a real trained
+> neural network for the energy-proxy calculation. Larger ML enhancements (deep RL
+> controller, CNN sensor fusion) are planned future work — see white paper Section 10.2.
 
 ---
 

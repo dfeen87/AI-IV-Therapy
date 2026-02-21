@@ -16,9 +16,9 @@ private:
     std::deque<double> recent_rates;
     // Removed internal time state 'last_check' to make evaluate pure/stateless regarding time
 
-    const double MAX_RATE_CHANGE    = config::MAX_RATE_CHANGE_ML_MIN;
-    const double MIN_CARDIAC_RESERVE = config::MIN_CARDIAC_RESERVE;
-    const double MAX_RISK_THRESHOLD  = config::HIGH_RISK_THRESHOLD;
+    static constexpr double MAX_RATE_CHANGE     = config::MAX_RATE_CHANGE_ML_MIN;
+    static constexpr double MIN_CARDIAC_RESERVE = config::MIN_CARDIAC_RESERVE;
+    static constexpr double MAX_RISK_THRESHOLD  = config::HIGH_RISK_THRESHOLD;
 
 public:
     SafetyMonitor(const PatientProfile& prof);
