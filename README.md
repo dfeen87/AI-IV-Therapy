@@ -33,7 +33,7 @@ AI-IV demonstrates how **real-time physiological telemetry**, **predictive state
 AI-IV is built around four non-negotiable principles:
 
 1. **Determinism First**  
-   Control logic must remain predictable, bounded, and timing-safe.
+   Control logic must remain predictable, bounded, and timing-safe. The core `SafetyMonitor` is designed to be pure and stateless with respect to time, ensuring deterministic behavior.
 
 2. **Safety Is Structural**  
    Safety constraints are embedded into the control architecture—not bolted on.
@@ -97,6 +97,7 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 - Cardiac reserve-based throttling
 - Rate-of-change limiting to prevent oscillation
 - Emergency fallback logic with minimum safe infusion guarantees
+- **Deterministic Evaluation**: Safety checks are time-step invariant, allowing for rigorous testing.
 
 ---
 
@@ -137,33 +138,34 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 
 ## System Architecture
 
-```
+The codebase has been refactored into a modular architecture to improve testability and safety:
 
+```
 Wearable / Simulated Sensors
 (Hydration, HR, SpO₂, Temp, Lactate, Fatigue)
 ↓
-State Estimator
-
+src/StateEstimator
 * Signal fusion & coherence checks
 * Nonlinear energy modeling
 * Cardiac reserve estimation
 * Risk scoring & prediction
   ↓
-  Adaptive AI Controller
+src/AdaptiveController
 * Risk-amplified demand modeling
 * Coherence-aware control gain
 * Predictive rate adjustment
   ↓
-  Safety Monitor
-* Volume limits
+src/SafetyMonitor
+* Volume limits (Time-step invariant)
 * Cardiac load protection
 * Rate-of-change constraints
 * Emergency overrides
   ↓
-  Infusion Pump Interface
-  (Deterministic, bounded output)
+Infusion Pump Interface
+(Deterministic, bounded output)
+```
 
-````
+Utility functions and logging are handled by `src/Utils` and `src/SystemLogger` respectively.
 
 ---
 
@@ -176,6 +178,7 @@ State Estimator
   - Clang ≥ 5  
   - MSVC ≥ 2017  
 - POSIX threads (`pthread`)
+- Make
 
 ### Build
 
@@ -183,8 +186,13 @@ State Estimator
 ```bash
 git clone https://github.com/dfeen87/ai-iv-therapy.git
 cd ai-iv-therapy
-g++ -std=c++17 -O2 -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
+make
 ./ai_iv
+```
+
+**Run Unit Tests:**
+```bash
+make test
 ```
 
 **Build with REST API (Global Network Access):**
@@ -192,6 +200,10 @@ g++ -std=c++17 -O2 -pthread src/adaptive_iv_therapy_control_system.cpp -o ai_iv
 g++ -std=c++17 -O2 -pthread -DENABLE_REST_API \
     src/adaptive_iv_therapy_control_system.cpp \
     src/rest_api_server.cpp \
+    src/SystemLogger.cpp \
+    src/SafetyMonitor.cpp \
+    src/StateEstimator.cpp \
+    src/AdaptiveController.cpp \
     -o ai_iv
 ./ai_iv
 ```
@@ -202,9 +214,10 @@ When built with REST API support, the system exposes real-time telemetry, state,
 
 ## Continuous Integration
 
-AI-IV uses a minimal, safety-aligned CI gate that focuses on deterministic compilation and an alerting smoke test. The workflow:
+AI-IV uses a minimal, safety-aligned CI gate that focuses on deterministic compilation, unit testing, and an alerting smoke test. The workflow:
 
 * Builds the core system with strict warnings (`-Wall -Wextra -Wpedantic`) under C++17.
+* Runs unit tests to verify safety logic and state estimation.
 * Builds and runs the alert/logging smoke-test variant (`-DAI_IV_ALERT_LOG_TEST`) to verify alert emission paths compile and execute.
 
 CI intentionally does **not** perform performance benchmarks, hardware-in-the-loop checks, network-based validation, or timing-dependent assertions. This scope is appropriate for a safety-critical, pre-clinical system because it verifies build integrity and observability paths without introducing nondeterminism or environmental coupling that could mask control-loop determinism and safety invariants.
