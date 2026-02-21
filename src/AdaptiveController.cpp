@@ -57,7 +57,7 @@ AdaptiveController::AdaptiveController(const PatientProfile& prof)
     : profile(prof), last_command(0.4) {}
 
 ControlOutput AdaptiveController::decide(const PatientState& state, SafetyMonitor& safety,
-                    StateEstimator& estimator) {
+                    StateEstimator& estimator, double dt_minutes) {
     ControlOutput output;
     bool predictive_boost = false;
 
@@ -79,7 +79,7 @@ ControlOutput AdaptiveController::decide(const PatientState& state, SafetyMonito
     desired_rate = Utils::clamp(desired_rate, 0.1, profile.max_safe_infusion_rate);
 
     // Step 5: Safety evaluation
-    auto safety_check = safety.evaluate(desired_rate, state);
+    auto safety_check = safety.evaluate(desired_rate, state, dt_minutes);
 
     bool safety_limited = false;
     if (desired_rate > safety_check.max_allowed_rate) {

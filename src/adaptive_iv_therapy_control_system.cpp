@@ -101,8 +101,10 @@ public:
             // 2. State estimation with energy transfer model
             PatientState state = estimator.estimate(measurement, profile, current_infusion_rate);
             
+            double cycle_duration_min = control_period.count() / 60000.0;
+
             // 3. Control decision with predictive capability
-            ControlOutput command = controller.decide(state, safety, estimator);
+            ControlOutput command = controller.decide(state, safety, estimator, cycle_duration_min);
             
             // 4. Update current rate for next cycle
             current_infusion_rate = command.infusion_ml_per_min;
@@ -197,7 +199,6 @@ public:
             display_status(state, command);
             
             // 7. Update safety monitor
-            double cycle_duration_min = control_period.count() / 60000.0;
             safety.update_volume(command.infusion_ml_per_min, cycle_duration_min);
             
             // 8. Send command to infusion pump (placeholder)

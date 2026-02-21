@@ -13,7 +13,7 @@ private:
     double cumulative_volume_ml;
     double max_volume_24h_ml;
     std::deque<double> recent_rates;
-    std::chrono::steady_clock::time_point last_check;
+    // Removed internal time state 'last_check' to make evaluate pure/stateless regarding time
 
     const double MAX_RATE_CHANGE = 0.3;  // ml/min per cycle
     const double MIN_CARDIAC_RESERVE = 0.2;
@@ -28,7 +28,8 @@ public:
         std::string warnings;
     };
 
-    SafetyCheck evaluate(double requested_rate, const PatientState& state);
+    // Updated to accept explicit time delta (dt_minutes)
+    SafetyCheck evaluate(double requested_rate, const PatientState& state, double dt_minutes);
 
     void update_volume(double rate_ml_per_min, double duration_min);
 

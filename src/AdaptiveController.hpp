@@ -21,8 +21,9 @@ private:
 public:
     AdaptiveController(const PatientProfile& prof);
 
+    // Updated to accept explicit time delta (dt_minutes)
     ControlOutput decide(const PatientState& state, SafetyMonitor& safety,
-                        StateEstimator& estimator);
+                        StateEstimator& estimator, double dt_minutes);
 };
 
 } // namespace ivsys

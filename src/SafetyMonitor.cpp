@@ -6,23 +6,21 @@
 namespace ivsys {
 
 SafetyMonitor::SafetyMonitor(const PatientProfile& prof)
-    : profile(prof), cumulative_volume_ml(0.0), last_check(std::chrono::steady_clock::now()) {
+    : profile(prof), cumulative_volume_ml(0.0) {
     max_volume_24h_ml = profile.weight_kg * 35.0;
     if (profile.cardiac_condition) max_volume_24h_ml *= 0.7;
     if (profile.renal_impairment) max_volume_24h_ml *= 0.6;
 }
 
-SafetyMonitor::SafetyCheck SafetyMonitor::evaluate(double requested_rate, const PatientState& state) {
+SafetyMonitor::SafetyCheck SafetyMonitor::evaluate(double requested_rate, const PatientState& state, double dt_minutes) {
     SafetyCheck result;
     result.passed = true;
     result.max_allowed_rate = profile.max_safe_infusion_rate;
     std::ostringstream warnings;
 
     // Check 1: Volume overload
-    auto now = std::chrono::steady_clock::now();
-    auto elapsed_h = std::chrono::duration<double, std::ratio<3600>>(
-        now - last_check).count();
-    last_check = now;
+    // Calculate projected volume using explicit time step
+    double elapsed_h = dt_minutes / 60.0;
 
     double projected_volume = cumulative_volume_ml + (requested_rate * 60.0 * elapsed_h);
     if (projected_volume > max_volume_24h_ml * 0.9) {

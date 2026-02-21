@@ -26,7 +26,8 @@ void test_volume_limit() {
     state.heart_rate_bpm = 70.0;
     state.hydration_pct = 90.0;
 
-    auto check = monitor.evaluate(1.0, state);
+    // Pass 1.0 minute as dt
+    auto check = monitor.evaluate(1.0, state, 1.0);
 
     // Should be limited because 2300 is > 0.9 * 2450 (2205)
     if (check.max_allowed_rate > 0.3) {
@@ -55,7 +56,8 @@ void test_cardiac_reserve() {
     state.heart_rate_bpm = 70.0;
     state.hydration_pct = 90.0;
 
-    auto check = monitor.evaluate(1.0, state);
+    // Pass 1.0 minute as dt
+    auto check = monitor.evaluate(1.0, state, 1.0);
 
     if (check.max_allowed_rate > 0.5) {
         std::cerr << "test_cardiac_reserve failed: max_allowed_rate " << check.max_allowed_rate << " > 0.5\n";
