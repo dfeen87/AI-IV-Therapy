@@ -1,0 +1,166 @@
+{
+  "architecture": {
+    "class_name": "Model",
+    "config": {
+      "name": "sensor_fusion_energy",
+      "layers": [
+        {
+          "class_name": "InputLayer",
+          "config": {
+            "batch_input_shape": [
+              null,
+              5
+            ],
+            "dtype": "float32",
+            "sparse": false,
+            "name": "telemetry_input"
+          },
+          "inbound_nodes": [],
+          "name": "telemetry_input"
+        },
+        {
+          "class_name": "Dense",
+          "config": {
+            "name": "hidden1",
+            "trainable": true,
+            "dtype": "float32",
+            "units": 16,
+            "activation": "relu",
+            "use_bias": true
+          },
+          "inbound_nodes": [
+            [
+              [
+                "telemetry_input",
+                0,
+                0,
+                {}
+              ]
+            ]
+          ],
+          "name": "hidden1"
+        },
+        {
+          "class_name": "Dense",
+          "config": {
+            "name": "hidden2",
+            "trainable": true,
+            "dtype": "float32",
+            "units": 8,
+            "activation": "relu",
+            "use_bias": true
+          },
+          "inbound_nodes": [
+            [
+              [
+                "hidden1",
+                0,
+                0,
+                {}
+              ]
+            ]
+          ],
+          "name": "hidden2"
+        },
+        {
+          "class_name": "Dense",
+          "config": {
+            "name": "energy_output",
+            "trainable": true,
+            "dtype": "float32",
+            "units": 1,
+            "activation": "sigmoid",
+            "use_bias": true
+          },
+          "inbound_nodes": [
+            [
+              [
+                "hidden2",
+                0,
+                0,
+                {}
+              ]
+            ]
+          ],
+          "name": "energy_output"
+        }
+      ],
+      "input_layers": [
+        [
+          "telemetry_input",
+          0,
+          0
+        ]
+      ],
+      "output_layers": [
+        [
+          "energy_output",
+          0,
+          0
+        ]
+      ]
+    }
+  },
+  "image_data_format": "channels_last",
+  "input_shapes": [
+    [
+      5
+    ]
+  ],
+  "output_shapes": [
+    [
+      1
+    ]
+  ],
+  "tests": [
+    {
+      "inputs": [
+        {
+          "shape": [
+            5
+          ],
+          "values": [
+            "zcxMPwAAwD5I4Xo/zczMPZqZmT4="
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "shape": [
+            1
+          ],
+          "values": [
+            "VM9VPw=="
+          ]
+        }
+      ]
+    }
+  ],
+  "trainable_params": {
+    "hidden1": {
+      "weights": [
+        "epp2PgoB2b4uf0i9awcjP8BPoj3IvkS+cdSdPX5YqL5EOOe+DzwgPntZDD8KMys/kjoEP7JXFD7mn+W+ncVzvkkpcj6MqNU+CzdovHYLfT2RSa++pjy5Pjq/Ub4SF+Q+t6qqvvCiqD2afkq8EkS0PUPc4D6+0KM9ZyNOvqQUqTy8dLG+lDd4vrfegrwiD/0+zxHxvbI9+r4+Rha+OuC/vsynvr5cyU2+hMmAvkkpv700QI4+LT9ZP1ymET7QUjE+rB0Lv0JuMT19m2E/sSravj+2lz4ht5e9pY0TPaCn1jzJVpu+Iym/viT03DzZxM29nXiDPbCd2b6FqgE/7L4oPYvmPj6piym+wxUaPcOXlD7Porq+PS+4PqQ4oT7egrm+4lCrvi4Gjr43TAA9ZPZKPphYr70Guju9WFiGPm6+mr4="
+      ],
+      "bias": [
+        "t2acvU+gH7wHElS+nb8yvZ3da73HORY/5QGCPgAAAAAAAAAAgNskvFDhY7677BG9dYAmvgmeaL6IQ9U+YT8uPQ=="
+      ]
+    },
+    "hidden2": {
+      "weights": [
+        "9qMlPlJ7tz7M7bA+uOgGv3gdDL6yovm9Ph5Hvvrkx76EsJO+GNvjPuRRgr4jbZE+nAebvp1x5Dw4iL8+gyz0PtV5G79KOBw/FNCpvhcgHr9sfxQ/rbkGvzyawb7FnDM8V7Bovvvn7z6Ay+G+9nRkPvpDRT4Xrcq+fjTuvRpO4D6Rsx69vLEtvijsFz5mP1U+u/Q3vmz1C770+6i+DFnJvtRlmT5CvDe/CKH+vsVfVj/KHRi/HGMqPhDSZr5wpS+/O+agPntTfD7gBcE+oQRKvNdFvT4SdJY+XitDvbKEo74AdfK9wBxdPkzW9z6AcYi86AFDvvDddT6E2OK+KL0IvoDigjwwc5u+MAX8PtgzZj7s++o+EB2XPrB46L2AVz8+SCRVvuZKpb5AHJ+9oDVIPiC2zL7kH6S+2IDHPkbjtD2+KcE/0M29vlA5T76reyc/7n6PvpQVgT+UZs2+BlAev/t5pD6k2Yo+wLqcvir9ND4/JBo/4fAyPpY5477Q68Q+LmRjvHgbQj44ZmU+VaKavgUdgT4h5Ms+yTDBvDr9oD4d2hS/DeQCPmDjPb0+viq/9xuevFc7Cb+8K4o+8qI1PxTgBT+gwhq+4LAbvboPhz41hAq/t4YAP46JOL4cnQe4fsqovYDtkb4cR/i+L5VmPmr8w76bQfQ9vShcu+7y1j0="
+      ],
+      "bias": [
+        "1WjTPloo0DwAAAAAbIudPkjKu71kaqg+BOLivKrFMj0="
+      ]
+    },
+    "energy_output": {
+      "weights": [
+        "NHxEv/Ln2D68ZrO+INEkv3X0Zj+iIQu//V3qvqTJiD8="
+      ],
+      "bias": [
+        "Q8uvPA=="
+      ]
+    }
+  },
+  "hash": "836585c6b240db35c12499fadfd590092859991036a424b4d4ca403ca1d9e177"
+}

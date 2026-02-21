@@ -18,7 +18,7 @@ private:
     double calculate_energy_transfer_absolute(const Telemetry& m, const EnergyTransferParams& params, double infusion_rate_ml_min, double weight_kg, double perfusion_state);
     double calculate_energy_proxy(const Telemetry& m);
     double calculate_metabolic_load(const Telemetry& m);
-    double calculate_cardiac_reserve(const Telemetry& m, double baseline_hr);
+    double calculate_cardiac_reserve(const Telemetry& m, double age_years);
     double calculate_risk_score(const Telemetry& m, double energy_T);
 
 public:

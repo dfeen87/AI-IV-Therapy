@@ -3,12 +3,12 @@
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
-![Version](https://img.shields.io/badge/version-v2.2.0-blueviolet)
+![Version](https://img.shields.io/badge/version-v4.0.0-blueviolet)
 
 **License:** MIT  
 **Primary Language:** C++17  
 **Supplementary Reference:** HTML / JavaScript (conceptual parity)  
-**Current Status:** v2.2.0 — Stable Pre-Clinical Research System  
+**Current Status:** v4.0.0 — Stable Pre-Clinical Research System  
 
 ---
 
@@ -100,12 +100,19 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 
 ---
 
-### 4. Adaptive AI Control Logic
+### 4. Adaptive Control Logic
 
 - Risk-amplified demand modeling for acute conditions
 - Coherence-modulated control gain under noisy telemetry
 - Cardiovascular protection via reserve-aware feedback
 - Smooth, monotonic infusion trajectories
+- **Neural energy estimator** — 241-parameter feedforward network trained with TensorFlow/Keras,
+  loaded at runtime via `frugally-deep` (enabled with `-DENABLE_NEURAL_ESTIMATOR`)
+
+> **About the "AI" in this project:** the default build uses a deterministic rule-based
+> nonlinear controller. Building with `-DENABLE_NEURAL_ESTIMATOR` swaps in a real trained
+> neural network for the energy-proxy calculation. Larger ML enhancements (deep RL
+> controller, CNN sensor fusion) are planned future work — see white paper Section 10.2.
 
 ---
 

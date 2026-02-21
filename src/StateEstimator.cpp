@@ -3,6 +3,23 @@
 #include <cmath>
 #include <algorithm>
 
+#ifdef ENABLE_NEURAL_ESTIMATOR
+#include "NeuralStateEstimator.hpp"
+#include <iostream>
+static ivsys::NeuralStateEstimator g_neural_estimator;
+static bool g_neural_init = false;
+static void init_neural_estimator() {
+    if (g_neural_init) return;
+    g_neural_init = true;
+    try {
+        g_neural_estimator.load(NEURAL_MODEL_PATH);
+    } catch (const std::exception& e) {
+        std::cerr << "[NeuralEstimator] WARNING: could not load model ("
+                  << e.what() << "); falling back to rule-based estimator.\n";
+    }
+}
+#endif
+
 namespace ivsys {
 
 double StateEstimator::calculate_coherence(const Telemetry& m) {
@@ -111,9 +128,8 @@ double StateEstimator::calculate_metabolic_load(const Telemetry& m) {
                        0.25*lactate_stress + 0.2*anxiety_stress, 0.0, 1.0);
 }
 
-double StateEstimator::calculate_cardiac_reserve(const Telemetry& m, double baseline_hr) {
-    double age_estimate = (220.0 - baseline_hr) / 0.7;
-    double max_predicted_hr = 220.0 - age_estimate;
+double StateEstimator::calculate_cardiac_reserve(const Telemetry& m, double age_years) {
+    double max_predicted_hr = 220.0 - age_years;  // Fox formula (1971) for age-predicted HRmax
     double current_percentage = m.heart_rate_bpm / max_predicted_hr;
 
     double reserve = 1.0 - Utils::sigmoid(current_percentage, 0.85, 10.0);
@@ -147,7 +163,21 @@ PatientState StateEstimator::estimate(const Telemetry& m, const PatientProfile& 
     state.heart_rate_bpm = std::max(0.0, m.heart_rate_bpm);
     state.coherence_sigma = calculate_coherence(m);
 
+#ifdef ENABLE_NEURAL_ESTIMATOR
+    init_neural_estimator();
+    if (g_neural_estimator.is_loaded()) {
+        state.energy_T = static_cast<double>(g_neural_estimator.predict(
+            static_cast<float>(m.hydration_pct  / 100.0),
+            static_cast<float>(m.heart_rate_bpm / 200.0),
+            static_cast<float>(m.spo2_pct       / 100.0),
+            static_cast<float>(m.lactate_mmol   /  20.0),
+            static_cast<float>(m.fatigue_idx)));
+    } else {
+        state.energy_T = calculate_energy_proxy(m);
+    }
+#else
     state.energy_T = calculate_energy_proxy(m);
+#endif
 
     state.energy_T_absolute = calculate_energy_transfer_absolute(
         m, profile.energy_params, current_infusion_rate,
@@ -161,7 +191,7 @@ PatientState StateEstimator::estimate(const Telemetry& m, const PatientProfile& 
         profile.energy_params.sigma_velocity);
 
     state.metabolic_load = calculate_metabolic_load(m);
-    state.cardiac_reserve = calculate_cardiac_reserve(m, profile.baseline_hr_bpm);
+    state.cardiac_reserve = calculate_cardiac_reserve(m, profile.age_years);
     state.risk_score = calculate_risk_score(m, state.energy_T);
 
     state.uncertainty = 1.0 - (state.coherence_sigma * (1.0 - 0.3*state.metabolic_load));
