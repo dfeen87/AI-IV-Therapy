@@ -310,8 +310,10 @@ Contributions are welcome in:
 
 ---
 
+##Acknowledgements
+
+I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, **Google Jules**, and **OpenAI ChatGPT** for their meaningful assistance in refining concepts, improving clarity, and strengthening the overall quality of this code.
+
 ## License
 
-MIT License — open for research, modification, and future clinical translation.
-
-© 2025–2026 Don Michael Feeney Jr.
+MIT License - see [LICENSE](LICENSE) file for details
