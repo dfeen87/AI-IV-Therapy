@@ -1,11 +1,9 @@
 # AI-Optimized Intravenous Therapy Control System (AI-IV)
 
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
 ![Version](https://img.shields.io/badge/version-v4.0.0-blueviolet)
 
-**License:** MIT  
 **Primary Language:** C++17  
 **Supplementary Reference:** HTML / JavaScript (conceptual parity)  
 **Current Status:** v4.0.0 — Stable Pre-Clinical Research System  
@@ -314,6 +312,10 @@ Contributions are welcome in:
 
 I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, **Google Jules**, and **OpenAI ChatGPT** for their meaningful assistance in refining concepts, improving clarity, and strengthening the overall quality of this code.
 
+---
+
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details
+This project is available for **non‑commercial use only** under the terms of the included LICENSE file.  
+Commercial use requires a separate paid license.
+
