@@ -6,17 +6,18 @@
 #ifdef ENABLE_NEURAL_ESTIMATOR
 #include "NeuralStateEstimator.hpp"
 #include <iostream>
+#include <mutex>
 static ivsys::NeuralStateEstimator g_neural_estimator;
-static bool g_neural_init = false;
+static std::once_flag g_neural_init_flag;
 static void init_neural_estimator() {
-    if (g_neural_init) return;
-    g_neural_init = true;
-    try {
-        g_neural_estimator.load(NEURAL_MODEL_PATH);
-    } catch (const std::exception& e) {
-        std::cerr << "[NeuralEstimator] WARNING: could not load model ("
-                  << e.what() << "); falling back to rule-based estimator.\n";
-    }
+    std::call_once(g_neural_init_flag, []() {
+        try {
+            g_neural_estimator.load(NEURAL_MODEL_PATH);
+        } catch (const std::exception& e) {
+            std::cerr << "[NeuralEstimator] WARNING: could not load model ("
+                      << e.what() << "); falling back to rule-based estimator.\n";
+        }
+    });
 }
 #endif
 
@@ -129,7 +130,7 @@ double StateEstimator::calculate_metabolic_load(const Telemetry& m) {
 }
 
 double StateEstimator::calculate_cardiac_reserve(const Telemetry& m, double age_years) {
-    double max_predicted_hr = 220.0 - age_years;  // Fox formula (1971) for age-predicted HRmax
+    double max_predicted_hr = std::max(1.0, 220.0 - age_years);  // Fox formula (1971) for age-predicted HRmax
     double current_percentage = m.heart_rate_bpm / max_predicted_hr;
 
     double reserve = 1.0 - Utils::sigmoid(current_percentage, 0.85, 10.0);

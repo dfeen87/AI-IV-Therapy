@@ -67,5 +67,44 @@ constexpr double UNCERTAINTY_GROWTH_PER_MIN = 0.05;
 // -----------------------------
 constexpr double DAILY_VOLUME_PER_KG_ML = 35.0;
 
+// -----------------------------
+// Tachycardia Detection
+// -----------------------------
+constexpr double TACHYCARDIA_HR_MULTIPLIER = 1.4;
+
+// -----------------------------
+// Safety Rate Caps
+// -----------------------------
+constexpr double VOLUME_LIMIT_RATE_CAP     = 0.3;
+constexpr double LOW_CARDIAC_RATE_CAP      = 0.5;
+constexpr double HIGH_RISK_RATE_CAP        = 0.6;
+constexpr double TACHYCARDIA_RATE_CAP      = 0.4;
+constexpr double EMERGENCY_MIN_RATE        = 0.1;
+constexpr double EMERGENCY_HYDRATION_THRESHOLD = 50.0;
+
+// -----------------------------
+// Volume Overload Threshold
+// -----------------------------
+constexpr double VOLUME_APPROACH_FRACTION  = 0.9;
+
+// -----------------------------
+// Predictive Boost
+// -----------------------------
+constexpr double PREDICTIVE_BOOST_MULTIPLIER     = 1.2;
+constexpr double PREDICTIVE_HYDRATION_THRESHOLD  = 50.0;
+
+// -----------------------------
+// Cardiac Limiting
+// -----------------------------
+constexpr double CARDIAC_SCALING_BASE      = 0.5;
+constexpr double CARDIAC_SCALING_RANGE     = 0.5;
+constexpr double CARDIAC_SIGMOID_STEEPNESS = 10.0;
+
+// -----------------------------
+// Daily Volume Condition Factors
+// -----------------------------
+constexpr double CARDIAC_CONDITION_VOLUME_FACTOR = 0.7;
+constexpr double RENAL_IMPAIRMENT_VOLUME_FACTOR  = 0.6;
+
 } // namespace config
 } // namespace ivsys

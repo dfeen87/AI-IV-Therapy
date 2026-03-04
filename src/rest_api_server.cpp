@@ -8,6 +8,9 @@
 #include <sstream>
 #include <algorithm>
 #include <iostream>
+#include <sys/time.h>
+
+namespace ivsys {
 
 RestApiServer::RestApiServer(int port, const std::string& bind_address)
     : port_(port), bind_address_(bind_address), server_socket_(-1), running_(false) {
@@ -119,10 +122,22 @@ void RestApiServer::server_loop() {
 }
 
 void RestApiServer::handle_client(int client_socket) {
-    char buffer[4096];
+    // Set a 5-second receive timeout to prevent slow-loris denial-of-service
+    struct timeval tv;
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+    if (setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        std::cerr << "Warning: failed to set SO_RCVTIMEO on client socket" << std::endl;
+    }
+
+    char buffer[MAX_REQUEST_SIZE];
     ssize_t bytes_read = recv(client_socket, buffer, sizeof(buffer) - 1, 0);
     
-    if (bytes_read <= 0) {
+    if (bytes_read <= 0 || static_cast<size_t>(bytes_read) >= MAX_REQUEST_SIZE) {
+        if (static_cast<size_t>(bytes_read) >= MAX_REQUEST_SIZE) {
+            std::string response = build_http_response(400, build_json_error("Request too large"));
+            send(client_socket, response.c_str(), response.length(), 0);
+        }
         return;
     }
     
@@ -133,6 +148,14 @@ void RestApiServer::handle_client(int client_socket) {
     std::istringstream request_stream(request);
     std::string method, path, version;
     request_stream >> method >> path >> version;
+
+    // Validate path: reject traversal patterns
+    if (path.find("..") != std::string::npos ||
+        path.find('\\') != std::string::npos) {
+        std::string response = build_http_response(400, build_json_error("Bad request"));
+        send(client_socket, response.c_str(), response.length(), 0);
+        return;
+    }
     
     // Route request
     std::string response = route_request(method, path);
@@ -167,7 +190,7 @@ std::string RestApiServer::route_request(const std::string& method, const std::s
         std::ostringstream json;
         json << "{"
              << "\"service\":\"AI-IV Therapy REST API\","
-             << "\"version\":\"4.0.0\","
+             << "\"version\":\"4.1.0\","
              << "\"endpoints\":["
              << "\"/api/status\","
              << "\"/api/telemetry\","
@@ -191,7 +214,7 @@ std::string RestApiServer::handle_status() {
     json << "{"
          << "\"status\":\"running\","
          << "\"timestamp\":\"" << get_current_timestamp() << "\","
-         << "\"api_version\":\"4.0.0\","
+         << "\"api_version\":\"4.1.0\","
          << "\"system\":\"AI-IV Therapy Control System\""
          << "}";
     
@@ -376,6 +399,7 @@ std::string RestApiServer::build_http_response(int status_code, const std::strin
     std::string status_text;
     switch (status_code) {
         case 200: status_text = "OK"; break;
+        case 400: status_text = "Bad Request"; break;
         case 404: status_text = "Not Found"; break;
         case 405: status_text = "Method Not Allowed"; break;
         case 500: status_text = "Internal Server Error"; break;
@@ -426,3 +450,5 @@ std::string RestApiServer::escape_json_string(const std::string& str) {
     }
     return escaped.str();
 }
+
+} // namespace ivsys
