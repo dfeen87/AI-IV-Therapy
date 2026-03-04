@@ -1,5 +1,6 @@
 #include "AdaptiveController.hpp"
 #include "Utils.hpp"
+#include "config_defaults.hpp"
 #include <sstream>
 #include <iomanip>
 
@@ -28,8 +29,9 @@ double AdaptiveController::apply_coherence_modulation(double base_rate, const Pa
 }
 
 double AdaptiveController::apply_cardiac_limiting(double rate, const PatientState& state) {
-    if (state.cardiac_reserve < 0.3) {
-        double scaling = 0.5 + 0.5 * Utils::sigmoid(state.cardiac_reserve, 0.3, 10.0);
+    if (state.cardiac_reserve < config::CARDIAC_LIMIT_THRESHOLD) {
+        double scaling = config::CARDIAC_SCALING_BASE + config::CARDIAC_SCALING_RANGE *
+            Utils::sigmoid(state.cardiac_reserve, config::CARDIAC_LIMIT_THRESHOLD, config::CARDIAC_SIGMOID_STEEPNESS);
         return rate * scaling;
     }
     return rate;
@@ -66,8 +68,8 @@ ControlOutput AdaptiveController::decide(const PatientState& state, SafetyMonito
 
     // Step 2: Predictive control
     auto predicted = estimator.predict_forward(10);
-    if (predicted.has_value() && predicted->hydration_pct < 50.0) {
-        desired_rate *= 1.2;
+    if (predicted.has_value() && predicted->hydration_pct < config::PREDICTIVE_HYDRATION_THRESHOLD) {
+        desired_rate *= config::PREDICTIVE_BOOST_MULTIPLIER;
         predictive_boost = true;
     }
 

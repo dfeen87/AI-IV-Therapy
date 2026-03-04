@@ -9,8 +9,7 @@
  * - JSON responses for modern client compatibility
  */
 
-#ifndef REST_API_SERVER_HPP
-#define REST_API_SERVER_HPP
+#pragma once
 
 #include "iv_system_types.hpp"
 #include <string>
@@ -27,9 +26,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+namespace ivsys {
+
 class RestApiServer {
 public:
-    RestApiServer(int port = 8080, const std::string& bind_address = "0.0.0.0");
+    RestApiServer(int port = 8080, const std::string& bind_address = "127.0.0.1");
     ~RestApiServer();
     
     // Server lifecycle
@@ -45,6 +46,9 @@ public:
     void update_config(const std::map<std::string, std::string>& config);
     
 private:
+    // Maximum HTTP request size (prevents slow-loris and oversized requests)
+    static constexpr size_t MAX_REQUEST_SIZE = 8192;
+
     // Server configuration
     int port_;
     std::string bind_address_;
@@ -123,4 +127,4 @@ private:
     std::string escape_json_string(const std::string& str);
 };
 
-#endif // REST_API_SERVER_HPP
+} // namespace ivsys

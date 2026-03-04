@@ -16,6 +16,9 @@ Telemetry SimulationEngine::generate_telemetry(double t) {
     m.lactate_mmol = 2.0;
     m.fatigue_idx = 0.3;
     m.blood_loss_idx = 0.0;
+    m.signal_quality = 1.0;
+    m.cardiac_output_L_min = 5.0;
+    m.anxiety_idx = 0.2;
     return m;
 }
 

@@ -74,43 +74,43 @@ struct EnergyTransferParams {
 };
 
 struct PatientState {
-    double hydration_pct;
-    double heart_rate_bpm;
-    double coherence_sigma;    // temporal stabilizer (0-1)
-    double energy_T;           // ATP/metabolic energy proxy (0-1)
-    double energy_T_absolute;  // NEW: Absolute energy transfer (W/kg)
-    double metabolic_load;     // stress on metabolic systems (0-1)
-    double cardiac_reserve;    // heart capacity headroom (0-1)
-    double risk_score;         // composite risk metric (0-1)
+    double hydration_pct = 0.0;
+    double heart_rate_bpm = 0.0;
+    double coherence_sigma = 0.0;    // temporal stabilizer (0-1)
+    double energy_T = 0.0;           // ATP/metabolic energy proxy (0-1)
+    double energy_T_absolute = 0.0;  // NEW: Absolute energy transfer (W/kg)
+    double metabolic_load = 0.0;     // stress on metabolic systems (0-1)
+    double cardiac_reserve = 0.0;    // heart capacity headroom (0-1)
+    double risk_score = 0.0;         // composite risk metric (0-1)
 
     // NEW: Flow dynamics
-    double estimated_flow_velocity_cm_s;
-    double flow_efficiency;    // G(v) - Gaussian term
+    double estimated_flow_velocity_cm_s = 0.0;
+    double flow_efficiency = 0.0;    // G(v) - Gaussian term
 
     // Prediction uncertainty
-    double uncertainty;        // confidence in state estimate (0-1)
+    double uncertainty = 0.0;        // confidence in state estimate (0-1)
 };
 
 struct ControlOutput {
-    double infusion_ml_per_min;
-    double confidence;
+    double infusion_ml_per_min = 0.0;
+    double confidence = 0.0;
     std::string rationale;
-    bool safety_override;
+    bool safety_override = false;
     std::string warning_flags;
 };
 
 struct PatientProfile {
-    double weight_kg;
-    double age_years;
-    bool cardiac_condition;
-    bool renal_impairment;
-    bool diabetes;
-    double baseline_hr_bpm;
-    double max_safe_infusion_rate;
+    double weight_kg = 0.0;
+    double age_years = 0.0;
+    bool cardiac_condition = false;
+    bool renal_impairment = false;
+    bool diabetes = false;
+    double baseline_hr_bpm = 0.0;
+    double max_safe_infusion_rate = 0.0;
 
     // NEW: Energy transfer specific
     EnergyTransferParams energy_params;
-    double current_tissue_perfusion; // 0-1: overall perfusion state
+    double current_tissue_perfusion = 0.0; // 0-1: overall perfusion state
 };
 
 enum class AlertSeverity {

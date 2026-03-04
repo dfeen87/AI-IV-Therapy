@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdexcept>
+#include <regex>
 
 namespace ivsys {
 
@@ -47,7 +48,12 @@ void SystemLogger::log_alert_event(const AlertEvent& event) {
              << ",\"code\":\"" << escape_json_string(event.code) << "\""
              << ",\"message\":\"" << escape_json_string(event.message) << "\"";
     if (event.context_json && !event.context_json->empty()) {
-        log_file << ",\"context\":" << *event.context_json;
+        const std::string& ctx = *event.context_json;
+        if (!ctx.empty() && (ctx.front() == '{' || ctx.front() == '[')) {
+            log_file << ",\"context\":" << ctx;
+        } else {
+            log_file << ",\"context\":\"" << escape_json_string(ctx) << "\"";
+        }
     }
     log_file << "}\n";
 
@@ -60,6 +66,11 @@ void SystemLogger::log_alert_event(const AlertEvent& event) {
 }
 
 SystemLogger::SystemLogger(const std::string& session_id) {
+    // Validate session_id against allowlist: only [a-zA-Z0-9_-] permitted
+    static const std::regex session_id_pattern("^[a-zA-Z0-9_-]+$");
+    if (session_id.empty() || !std::regex_match(session_id, session_id_pattern)) {
+        throw std::invalid_argument("Invalid session_id: must match [a-zA-Z0-9_-]+ and not be empty");
+    }
     std::string prefix = "ai_iv_" + session_id;
     log_file.open(prefix + "_system.log");
     telemetry_file.open(prefix + "_telemetry.csv");
@@ -111,8 +122,8 @@ void SystemLogger::log_control(const ControlOutput& out, const PatientState& sta
                  << state.flow_efficiency << ","
                  << state.risk_score << ","
                  << state.cardiac_reserve << ","
-                 << out.warning_flags << ","
-                 << out.rationale << "\n";
+                 << "\"" << out.warning_flags << "\","
+                 << "\"" << out.rationale << "\"\n";
     if (++control_flush_counter % kFlushEvery == 0) {
         control_file.flush();
     }

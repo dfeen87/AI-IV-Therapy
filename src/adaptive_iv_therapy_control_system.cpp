@@ -67,7 +67,7 @@ public:
         
 #ifdef ENABLE_REST_API
         // Initialize REST API server on port 8080
-        rest_api = std::make_unique<RestApiServer>(8080, "0.0.0.0");
+        rest_api = std::make_unique<RestApiServer>(8080, "127.0.0.1");
         
         // Set initial configuration
         std::map<std::string, std::string> config;
@@ -292,7 +292,7 @@ private:
 #ifndef AI_IV_ALERT_LOG_TEST
 int main() {
     std::cout << "╔════════════════════════════════════════════════════════════╗\n";
-    std::cout << "║  AI-IV Control System v4.0 - Enhanced Energy Transfer     ║\n";
+    std::cout << "║  AI-IV Control System v4.1 - Enhanced Energy Transfer     ║\n";
     std::cout << "║  Full nonlinear dynamics from white paper section 4.1     ║\n";
     std::cout << "╚════════════════════════════════════════════════════════════╝\n\n";
     
