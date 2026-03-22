@@ -326,5 +326,5 @@ This release establishes the foundational research platform on which all future 
 This software is provided **for research purposes only**.  
 It must not be used for patient care without appropriate regulatory approval, clinical validation, certified hardware integration, and qualified medical oversight.
 
-© 2025 Don Michael Feeney Jr.  
-Released under the MIT License.
+© 2026 Don Michael Feeney Jr.  
+Released under the Non-Commercial License (see LICENSE file).

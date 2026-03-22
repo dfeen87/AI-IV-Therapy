@@ -1638,7 +1638,7 @@ This research was developed through interdisciplinary collaboration across engin
 
 **Conflict of Interest Statement:** This white paper represents independent research with no industry funding. The authors have no financial conflicts related to this technology.
 
-**Open Science Commitment:** All algorithms, simulation code, and data are released under MIT License for academic and commercial use. We believe open collaboration accelerates translation from research to patient care.
+**Open Science Commitment:** All algorithms, simulation code, and data are released under a Non-Commercial License for academic and research use. We believe open collaboration accelerates translation from research to patient care.
 
 ---
 
@@ -1655,5 +1655,5 @@ This research was developed through interdisciplinary collaboration across engin
 **Citation:**  
 Don Michael Feeney AI-Optimized Intravenous Therapy: A Paradigm Shift in Adaptive Medical Care. White Paper v1.0. December 2025.
 
-**License:** Creative Commons Attribution 4.0 International (CC BY 4.0)  
-*You are free to share and adapt this material with attribution.*
+**License:** Non-Commercial License (see LICENSE file)  
+*Non-commercial use permitted with attribution. Commercial use requires a separate license.*
