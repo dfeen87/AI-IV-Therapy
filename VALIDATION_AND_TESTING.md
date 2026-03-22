@@ -575,6 +575,6 @@ not replace — those processes.
 
 ---
 
-© 2025–2026 Don Michael Feeney Jr.  
-Released under the MIT License  
+© 2026 Don Michael Feeney Jr.  
+Released under the Non-Commercial License (see LICENSE file)  
 Research use only
