@@ -7,6 +7,29 @@ All releases are **pre-clinical research only** unless explicitly stated otherwi
 
 ---
 
+## [4.1.1] — Documentation Polish & Version Consistency
+
+**Status:** Pre-Clinical Research (Non-Clinical Use)
+
+This release applies a second-pass documentation hardening pass. No functional,
+architectural, or behavioral changes are included.
+
+### Changed
+
+- **README.md**: Updated version badge and status line to `v4.1.1`. Fixed missing
+  space in `## Acknowledgements` heading. Corrected inconsistent indentation in the
+  system architecture ASCII diagram. Fixed mismatched closing code fence (4 backticks → 3).
+- **docs/VALIDATION.md**: Updated stale version header from `v1.0.x` to `v4.1.1`.
+  Updated all in-document release references accordingly.
+- **docs/PLUGINS.md**: Added explicit clarification that the plugin interface applies
+  to the JavaScript dashboard layer only, not to the C++ control core.
+- **docs/Dashboard.md**: Added proper Markdown section headings throughout.
+- **docs/CHANGELOG.md**: Added this entry.
+- **examples/README.md**: Removed hardcoded CI sandbox absolute path from build
+  command; replaced with a portable relative path.
+
+---
+
 ## [4.0.0] — Full Modular Refactor, REST API & Observability Platform
 
 **Status:** Pre-Clinical Research (Non-Clinical Use)

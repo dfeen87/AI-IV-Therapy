@@ -1,5 +1,9 @@
 # Plugin System
 
+> **Scope:** This plugin interface applies exclusively to the **JavaScript dashboard layer**
+> (`dashboard/ai_iv_dashboard.html`). The C++ control core (`src/`) has no plugin hooks.
+> The two systems are architecturally independent; plugins cannot reach or influence C++ control logic.
+
 This document defines the **official plugin architecture** for the AI-Optimized Intravenous Therapy Control System.
 
 The plugin system is part of the **v1.0 stable API**.  

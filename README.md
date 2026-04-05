@@ -2,11 +2,11 @@
 
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
-![Version](https://img.shields.io/badge/version-v4.0.0-blueviolet)
+![Version](https://img.shields.io/badge/version-v4.1.1-blueviolet)
 
 **Primary Language:** C++17  
 **Supplementary Reference:** HTML / JavaScript (conceptual parity)  
-**Current Status:** v4.0.0 — Stable Pre-Clinical Research System  
+**Current Status:** v4.1.1 — Stable Pre-Clinical Research System  
 
 ---
 
@@ -143,32 +143,29 @@ AI-IV implements an **adaptive, closed-loop IV control framework** that:
 ## System Architecture
 
 ```
-
 Wearable / Simulated Sensors
 (Hydration, HR, SpO₂, Temp, Lactate, Fatigue)
 ↓
 State Estimator
-
-* Signal fusion & coherence checks
-* Nonlinear energy modeling
-* Cardiac reserve estimation
-* Risk scoring & prediction
-  ↓
-  Adaptive AI Controller
-* Risk-amplified demand modeling
-* Coherence-aware control gain
-* Predictive rate adjustment
-  ↓
-  Safety Monitor
-* Volume limits
-* Cardiac load protection
-* Rate-of-change constraints
-* Emergency overrides
-  ↓
-  Infusion Pump Interface
+  * Signal fusion & coherence checks
+  * Nonlinear energy modeling
+  * Cardiac reserve estimation
+  * Risk scoring & prediction
+↓
+Adaptive AI Controller
+  * Risk-amplified demand modeling
+  * Coherence-aware control gain
+  * Predictive rate adjustment
+↓
+Safety Monitor
+  * Volume limits
+  * Cardiac load protection
+  * Rate-of-change constraints
+  * Emergency overrides
+↓
+Infusion Pump Interface
   (Deterministic, bounded output)
-
-````
+```
 
 ---
 
@@ -308,7 +305,7 @@ Contributions are welcome in:
 
 ---
 
-##Acknowledgements
+## Acknowledgements
 
 I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, **Google Jules**, and **OpenAI ChatGPT** for their meaningful assistance in refining concepts, improving clarity, and strengthening the overall quality of this code.
 
