@@ -2,13 +2,13 @@
 
 ## Validation Framework and Guarantees  
 AI-Optimized Intravenous Therapy Control System  
-Version: v1.0.x (Pre-Clinical Research Reference)
+Version: v4.1.1 (Pre-Clinical Research Reference)
 
 ---
 
 ## Purpose of This Document
 
-This document defines the **validation scope, guarantees, and limitations** of the AI-Optimized Intravenous Therapy Control System as released in v1.0.
+This document defines the **validation scope, guarantees, and limitations** of the AI-Optimized Intravenous Therapy Control System as released in v4.1.1.
 
 Validation in this context refers to:
 
@@ -66,7 +66,7 @@ The following properties are validated through deterministic simulation and test
 
 ## Out-of-Scope Validation
 
-The following are **explicitly not validated** in v1.0:
+The following are **explicitly not validated** in v4.1.1:
 
 - Clinical efficacy or patient outcomes
 - Accuracy of real-world sensors
@@ -103,7 +103,7 @@ Tests are designed to fail loudly if invariants are violated.
 
 ## System Invariants
 
-The following invariants are guaranteed by design in v1.0:
+The following invariants are guaranteed by design in v4.1.1:
 
 1. **Infusion Rate Bounds**  
    Infusion rate is always constrained to the configured minimum and maximum limits.
@@ -173,7 +173,7 @@ This document is written for:
 
 ## Summary
 
-Version v1.0 of the AI-Optimized Intravenous Therapy Control System is a **validated research reference**, not a clinical product.
+Version v4.1.1 of the AI-Optimized Intravenous Therapy Control System is a **validated research reference**, not a clinical product.
 
 Its guarantees are explicit, its limitations are documented, and its behavior is reproducible.
 

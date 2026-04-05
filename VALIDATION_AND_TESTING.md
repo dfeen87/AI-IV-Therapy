@@ -1,6 +1,6 @@
 # Validation and Testing
 
-**AI-Optimized Intravenous Therapy Control System — v4.0.0**  
+**AI-Optimized Intravenous Therapy Control System — v4.1.1**  
 **Status:** Pre-Clinical Research Reference  
 **Language:** C++17  
 
@@ -100,7 +100,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -pthread
 All three flags (`-Wall`, `-Wextra`, and the C++17 standard) are enforced. The build produces
 **zero warnings** on the standard target.
 
-### Build Results (v4.0.0)
+### Build Results (v4.1.1)
 
 | Target | Result |
 |---|---|
@@ -539,7 +539,7 @@ prediction is available.
 
 ## 9. Known Gaps and Limitations
 
-The following gaps are acknowledged in the v4.0.0 codebase. They do not affect the validity
+The following gaps are acknowledged in the v4.1.1 codebase. They do not affect the validity
 of the current pre-clinical research scope but are relevant for future development.
 
 | Gap | Detail | Status |

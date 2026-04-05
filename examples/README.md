@@ -11,7 +11,6 @@ This directory contains example client applications demonstrating how to interac
 ## Building the Server with REST API
 
 ```bash
-cd /home/runner/work/AI-IV-Therapy/AI-IV-Therapy
 g++ -std=c++17 -O2 -pthread -DENABLE_REST_API \
     src/adaptive_iv_therapy_control_system.cpp \
     src/rest_api_server.cpp \
