@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mutex>
-#include <atomic>
 #include <map>
 #include <string>
 #include "../iv_logic/ailee_decision_engine.hpp"
@@ -37,9 +36,10 @@ private:
     double prev_aggregate_confidence_;
     double stability_score_; // 0-100
 
-    // Vital-signal tracking
+    // Vital-signal tracking (uses its own counter to avoid division by decision_count_)
     std::map<std::string, double> prev_signal_values_;
     double cumulative_signal_volatility_;
+    unsigned long signal_observation_count_;
 };
 
 } // namespace extensions

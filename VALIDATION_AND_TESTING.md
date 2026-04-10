@@ -1,6 +1,6 @@
 # Validation and Testing
 
-**AI-Optimized Intravenous Therapy Control System — v4.1.1**  
+**AI-Optimized Intravenous Therapy Control System — v4.2.0**  
 **Status:** Pre-Clinical Research Reference  
 **Language:** C++17  
 
@@ -100,7 +100,7 @@ g++ -std=c++17 -O2 -Wall -Wextra -pthread
 All three flags (`-Wall`, `-Wextra`, and the C++17 standard) are enforced. The build produces
 **zero warnings** on the standard target.
 
-### Build Results (v4.1.1)
+### Build Results (v4.2.0)
 
 | Target | Result |
 |---|---|
@@ -539,14 +539,14 @@ prediction is available.
 
 ## 9. Known Gaps and Limitations
 
-The following gaps are acknowledged in the v4.1.1 codebase. They do not affect the validity
+The following gaps are acknowledged in the v4.2.0 codebase. They do not affect the validity
 of the current pre-clinical research scope but are relevant for future development.
 
 | Gap | Detail | Status |
 |---|---|---|
-| **`AdaptiveController` has no unit tests** | Controller logic (`calculate_base_rate`, `apply_coherence_modulation`, etc.) is exercised only via integration. | Deferred to v4.1 |
-| **`SystemLogger` has no unit tests** | NDJSON output format, escape logic, and file I/O are untested in isolation. | Deferred to v4.1 |
-| **`RestApiServer` has no unit tests** | JSON serialisation and HTTP response formatting are untested. | Deferred to v4.1 |
+| **`AdaptiveController` has no unit tests** | Controller logic (`calculate_base_rate`, `apply_coherence_modulation`, etc.) is exercised only via integration. | Deferred to v4.3 |
+| **`SystemLogger` has no unit tests** | NDJSON output format, escape logic, and file I/O are untested in isolation. | Deferred to v4.3 |
+| **`RestApiServer` has no unit tests** | JSON serialisation and HTTP response formatting are untested. | Deferred to v4.3 |
 | **`simulation_engine.cpp` not in Makefile** | The `SimulationEngine` compiles but has no test target and is not exercised by CI. | Known issue |
 | **`PatientProfile` has no default initialisers** | Partially initialised `PatientProfile` objects risk undefined behaviour from uninitialised reads in test code. | Known issue |
 | **REST API binds to `0.0.0.0` by default** | No authentication, no TLS, and global network binding are unsafe outside an isolated research network. | Research-only |

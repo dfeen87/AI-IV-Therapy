@@ -1,4 +1,5 @@
 #include "simulation_metrics_observer.hpp"
+#include <algorithm>
 #include <cmath>
 
 namespace ivsys {
@@ -8,7 +9,7 @@ SimulationMetricsObserver::SimulationMetricsObserver()
     : total_adjustments_(0), fallback_count_(0), cumulative_confidence_(0.0),
       decision_count_(0), cumulative_latency_ms_(0.0),
       prev_aggregate_confidence_(1.0), stability_score_(100.0),
-      cumulative_signal_volatility_(0.0) {}
+      cumulative_signal_volatility_(0.0), signal_observation_count_(0) {}
 
 SimulationMetricsObserver& SimulationMetricsObserver::get_instance() {
     static SimulationMetricsObserver instance;
@@ -28,8 +29,10 @@ void SimulationMetricsObserver::observe_decision(const AileeDecision& decision, 
         fallback_count_++;
     }
 
-    // Update stability score based on confidence volatility
-    double conf_change = std::abs(decision.aggregate_confidence - prev_aggregate_confidence_);
+    // Update stability score based on confidence volatility.
+    // Clamp conf_change to [0.0, 1.0] so that the EWMA term stays non-negative
+    // even on the first call (when prev_aggregate_confidence_ is initialised to 1.0).
+    double conf_change = std::min(1.0, std::abs(decision.aggregate_confidence - prev_aggregate_confidence_));
     stability_score_ = (stability_score_ * 0.95) + ((1.0 - conf_change) * 100.0 * 0.05);
     prev_aggregate_confidence_ = decision.aggregate_confidence;
 }
@@ -47,6 +50,7 @@ void SimulationMetricsObserver::observe_signals(const std::vector<ModelSignal>& 
 
     if (!signals.empty()) {
         cumulative_signal_volatility_ += (current_volatility / signals.size());
+        signal_observation_count_++;
     }
 }
 
@@ -59,7 +63,10 @@ std::map<std::string, std::string> SimulationMetricsObserver::get_metrics() cons
     metrics["average_confidence"] = decision_count_ > 0 ? std::to_string(cumulative_confidence_ / decision_count_) : "0.0";
     metrics["stability_score"] = std::to_string(stability_score_);
     metrics["average_decision_latency_ms"] = decision_count_ > 0 ? std::to_string(cumulative_latency_ms_ / decision_count_) : "0.0";
-    metrics["vital_signal_volatility"] = decision_count_ > 0 ? std::to_string(cumulative_signal_volatility_ / decision_count_) : "0.0";
+    // Divide by signal_observation_count_ (not decision_count_) to avoid a
+    // systematically incorrect average when observe_signals() and observe_decision()
+    // are called at different rates.
+    metrics["vital_signal_volatility"] = signal_observation_count_ > 0 ? std::to_string(cumulative_signal_volatility_ / signal_observation_count_) : "0.0";
 
     return metrics;
 }
