@@ -1,5 +1,12 @@
 # AILEE Trust Layer Integration (Simulation Extensions)
 
+**Version:** v4.2.0
+
+> **Staging Notice:** The modules described in this document (`iv_logic/` and
+> `iv_extensions/`) are staging additions. They are not yet included in the CI build
+> or Makefile targets. Integration into the main simulation loop is deferred to a
+> future release.
+
 This document describes the optional plugins and extensions added to the AI-IV-Treatment simulation to model high-fidelity, safety-critical decision validation using the AILEE (Adaptive Integrity Layer for AI Decision Systems) architecture.
 
 **Note:** These extensions are for simulation realism only. They enhance the complexity and behavior of the simulation environment but do not provide clinical guidance or real-world medical functionality.
@@ -19,12 +26,18 @@ The `AileeDecisionEngine` (`iv_logic/ailee_decision_engine.hpp`) aggregates the 
 * **Borderline Confidence (0.60 - 0.84):** The system applies "Grace Logic". It will allow maintaining the current flow but will reject flow changes (increase/decrease) as unsafe under uncertainty.
 * **Low Confidence (< 0.60):** The system outright rejects the baseline action.
 
+> **Threshold note:** The `CONFIDENCE_THRESHOLD_HIGH` (0.85) matches the AILEE Python
+> library default (`accept_threshold`). The `CONFIDENCE_THRESHOLD_LOW` (0.60) is a
+> deliberate adaptation: the AILEE Python default `grace_min` is 0.70, but the wider
+> 0.60 boundary is chosen here to provide a more conservative grace window suited to
+> the multi-vital-sign confidence averaging used in this simulation.
+
 ## 3. Fallback Architecture
-When the `AileeDecisionEngine` rejects an action due to low or borderline confidence (when a change was proposed), it outputs a `FALLBACK_FLOW` decision.
-The `FlowAdjustmentPlugin` handles this by overriding the proposed rate with a safe, rolling-mean infusion rate, ensuring output stability and preventing catastrophic jumps.
+When the `AileeDecisionEngine` rejects an action due to low or borderline confidence (when a change was proposed), it outputs a `FALLBACK_FLOW` decision and sets `AileeDecision::used_fallback = true`.
+The `FlowAdjustmentPlugin` handles this by overriding the proposed rate with a safe, rolling-mean infusion rate, ensuring output stability and preventing catastrophic jumps. The rolling mean is initialised to `config::MIN_INFUSION_RATE_ML_MIN` (0.1 ml/min) to guarantee the fallback value is always within the system's configured infusion bounds.
 
 ## 4. Plugin Registration
-* **`FlowAdjustmentPlugin`**: Can be used as a singleton in the simulation loop. It applies the decision to the `ivsys::ControlOutput` and generates formatted logs.
+* **`FlowAdjustmentPlugin`**: Can be used as a singleton in the simulation loop. It applies the decision to the `ivsys::ControlOutput` and generates formatted logs. Thread-safe via internal mutex.
 * **`SimulationMetricsObserver`**: A thread-safe observer that tracks overall system performance, fallback frequency, stability, and latency.
 
 ## 5. Extending the System

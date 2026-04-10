@@ -292,8 +292,8 @@ private:
 #ifndef AI_IV_ALERT_LOG_TEST
 int main() {
     std::cout << "╔════════════════════════════════════════════════════════════╗\n";
-    std::cout << "║  AI-IV Control System v4.1 - Enhanced Energy Transfer     ║\n";
-    std::cout << "║  Full nonlinear dynamics from white paper section 4.1     ║\n";
+    std::cout << "║  AI-IV Control System v4.2.0 - Enhanced Energy Transfer    ║\n";
+    std::cout << "║  Full nonlinear dynamics from white paper section 4.1      ║\n";
     std::cout << "╚════════════════════════════════════════════════════════════╝\n\n";
     
     // Define patient profile

@@ -30,8 +30,9 @@ std::vector<ModelSignal> VitalSignalGenerator::generate_signals(const ivsys::Tel
     double hr = telemetry.heart_rate_bpm;
     double spo2 = telemetry.spo2_pct;
     double temp = telemetry.temp_celsius;
-    // Derive a simulated BP (just for modeling purposes in the extension)
-    // A very simplistic simulation of BP based on HR and hydration
+    // Derive a simulated BP (for simulation modeling purposes only).
+    // Simulation-only heuristic: not a clinical BP estimation formula.
+    // bp_sys rises with HR (sympathetic tone proxy) and falls with dehydration.
     double bp_sys = 120.0 + (hr - 70.0) * 0.5 - (100.0 - telemetry.hydration_pct) * 0.2;
 
     double sensor_quality = telemetry.signal_quality;

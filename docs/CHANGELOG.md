@@ -7,6 +7,75 @@ All releases are **pre-clinical research only** unless explicitly stated otherwi
 
 ---
 
+## [4.2.0] — AILEE Trust Layer Integration Modules
+
+**Status:** Pre-Clinical Research (Non-Clinical Use)
+
+This release adds optional simulation-extension modules that model safety-critical
+decision validation using the AILEE (Adaptive Integrity Layer for AI Decision Systems)
+architecture. All new code is additive and does not modify any existing simulation logic,
+API endpoints, or class signatures.
+
+### Added
+
+- **`iv_logic/vital_signal_generator.hpp/.cpp`**: Converts `ivsys::Telemetry` snapshots
+  into AILEE-style `ModelSignal` structures with per-vital confidence scoring and
+  stability-based confidence degradation.
+- **`iv_logic/ailee_decision_engine.hpp/.cpp`**: Aggregates `ModelSignal` confidence
+  scores and applies layered AILEE trust logic (ACCEPTED / GRACE / GRACE FAILED / REJECTED)
+  to produce an `AileeDecision` with explicit `used_fallback` field.
+- **`iv_extensions/flow_adjustment_plugin.hpp/.cpp`**: Singleton plugin that applies a
+  validated `AileeDecision` to `ivsys::ControlOutput`. Rate steps are bounded by
+  `config::MAX_RATE_CHANGE_ML_MIN`; fallback initialises from `config::MIN_INFUSION_RATE_ML_MIN`
+  to stay within system bounds. Thread-safe via internal mutex. Logs use ISO 8601 timestamps
+  consistent with `SystemLogger` and `RestApiServer`.
+- **`iv_extensions/simulation_metrics_observer.hpp/.cpp`**: Thread-safe singleton observer
+  tracking decision counts, fallback frequency, average confidence, stability score, latency,
+  and vital-signal volatility. Exposes metrics via `get_metrics()` for optional REST API
+  integration.
+- **`docs/iv_ailee_integration.md`**: Documents the AILEE mapping, decision logic,
+  fallback architecture, and REST API extension path. Includes staging notice and
+  threshold deviation rationale.
+
+### Fixed (in new modules)
+
+- Fallback infusion rate initialised to `config::MIN_INFUSION_RATE_ML_MIN` (0.1 ml/min)
+  instead of the erroneous initial value of 50.0 ml/min (33× the system maximum).
+- INCREASE/DECREASE step sizes use `config::MAX_RATE_CHANGE_ML_MIN` and are clamped to
+  `[config::MIN_INFUSION_RATE_ML_MIN, config::MAX_INFUSION_RATE_ML_MIN]`.
+- `FlowAdjustmentPlugin` is now thread-safe; `apply_decision()` and `get_latest_log()`
+  are protected by an internal mutex.
+- `FlowAdjustmentPlugin` sets `ControlOutput::warning_flags` on FALLBACK for audit trail
+  compatibility with `SystemLogger`.
+- `SimulationMetricsObserver`: `conf_change` clamped to `[0.0, 1.0]` to prevent a
+  negative EWMA stability term on the first observation.
+- `SimulationMetricsObserver`: `vital_signal_volatility` now divided by a dedicated
+  `signal_observation_count_` counter rather than `decision_count_`.
+
+### Changed
+
+- `AileeDecision` struct: added `bool used_fallback` field for machine-parseable fallback
+  detection (previously encoded only in the `reasoning` string).
+- `AileeDecisionEngine`: threshold members changed from `const double` to
+  `static constexpr double`; magic HR/BP numbers extracted to named constants with
+  simulation-framing comments.
+- `VitalSignalGenerator`: added thread-safety doc comment; BP formula annotated as
+  simulation-only heuristic.
+- Version updated to `4.2.0` in README, startup banner, REST API version fields,
+  `docs/VALIDATION.md`, and `VALIDATION_AND_TESTING.md`.
+
+### Notes
+
+- The new AILEE modules are **staging additions**. They are not yet wired into the
+  Makefile or CI build; integration into the main simulation loop is deferred.
+- These extensions are for simulation realism only. They do not provide clinical
+  guidance or real-world medical functionality.
+- The `CONFIDENCE_THRESHOLD_LOW` (0.60) used in `AileeDecisionEngine` is a deliberate
+  deviation from the AILEE Python default (`grace_min = 0.70`), providing a wider grace
+  window appropriate for multi-vital-sign confidence averaging in simulation.
+
+---
+
 ## [4.1.1] — Documentation Polish & Version Consistency
 
 **Status:** Pre-Clinical Research (Non-Clinical Use)

@@ -16,6 +16,9 @@ struct ModelSignal {
     std::string degradation_reason; // Documented rules for confidence degradation
 };
 
+// Not thread-safe: instances must be accessed from a single thread.
+// Each VitalSignalGenerator maintains mutable previous-value state for
+// stability analysis; guard access externally if shared across threads.
 class VitalSignalGenerator {
 public:
     VitalSignalGenerator();

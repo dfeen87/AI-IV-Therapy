@@ -190,7 +190,7 @@ std::string RestApiServer::route_request(const std::string& method, const std::s
         std::ostringstream json;
         json << "{"
              << "\"service\":\"AI-IV Therapy REST API\","
-             << "\"version\":\"4.1.0\","
+             << "\"version\":\"4.2.0\","
              << "\"endpoints\":["
              << "\"/api/status\","
              << "\"/api/telemetry\","
@@ -214,7 +214,7 @@ std::string RestApiServer::handle_status() {
     json << "{"
          << "\"status\":\"running\","
          << "\"timestamp\":\"" << get_current_timestamp() << "\","
-         << "\"api_version\":\"4.1.0\","
+         << "\"api_version\":\"4.2.0\","
          << "\"system\":\"AI-IV Therapy Control System\""
          << "}";
     
