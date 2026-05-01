@@ -22,7 +22,7 @@ AI-IV demonstrates how **real-time physiological telemetry**, **predictive state
 - Future regulated medical device development
 
 > **Important:**  
-> This software is **not a clinical device**. It is intended exclusively for **research, simulation, and pre-clinical development**.
+> This software is **not a clinical device**. It is intended for **research, simulation, and pre-clinical development**, and is released as open-source under the **MIT License**.
 
 ---
 
@@ -313,6 +313,6 @@ I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, **Googl
 
 ## License
 
-This project is available for **non‑commercial use only** under the terms of the included LICENSE file.  
-Commercial use requires a separate paid license.
+This project is open-source and released under the **MIT License**.
 
+You may use, copy, modify, distribute, sublicense, and/or sell this software under the terms of the MIT License. See [LICENSE](LICENSE) for full details.
