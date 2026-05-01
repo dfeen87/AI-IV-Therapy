@@ -32,6 +32,9 @@ struct Telemetry {
     double spo2_pct = 0.0;          // 0-100: blood oxygen saturation
     double lactate_mmol = 0.0;      // blood lactate concentration
     double cardiac_output_L_min = 0.0;  // NEW: measured/estimated cardiac output
+    double vault_mesh_size_nm = 0.0;
+    double vault_payload_pct = 0.0;
+    bool vault_cage_breached = false;
 };
 
 struct EnergyTransferParams {
