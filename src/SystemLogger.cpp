@@ -81,7 +81,7 @@ SystemLogger::SystemLogger(const std::string& session_id) {
 
     telemetry_file << "timestamp,hydration_pct,heart_rate_bpm,temp_c,blood_loss_idx,"
                    << "fatigue_idx,anxiety_idx,signal_quality,spo2_pct,lactate_mmol,"
-                   << "cardiac_output_L_min\n";
+                   << "cardiac_output_L_min,vault_mesh_size_nm,vault_payload_pct,vault_cage_breached\n";
 
     control_file << "timestamp,infusion_rate_ml_min,confidence,energy_T,energy_T_abs_W_kg,"
                 << "flow_velocity_cm_s,flow_efficiency,risk_score,"
@@ -105,7 +105,10 @@ void SystemLogger::log_telemetry(const Telemetry& m) {
                    << m.signal_quality << ","
                    << m.spo2_pct << ","
                    << m.lactate_mmol << ","
-                   << m.cardiac_output_L_min << "\n";
+                   << m.cardiac_output_L_min << ","
+                   << m.vault_mesh_size_nm << ","
+                   << m.vault_payload_pct << ","
+                   << m.vault_cage_breached << "\n";
     if (++telemetry_flush_counter % kFlushEvery == 0) {
         telemetry_file.flush();
     }

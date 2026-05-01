@@ -25,6 +25,7 @@
 #include "SafetyMonitor.hpp"
 #include "StateEstimator.hpp"
 #include "AdaptiveController.hpp"
+#include "domains/metabojoint_domain.hpp"
 
 // REST API Server (optional - enable with -DENABLE_REST_API flag)
 #ifdef ENABLE_REST_API
@@ -50,6 +51,9 @@ private:
     std::atomic<bool> running;
     double current_infusion_rate;
     const std::chrono::milliseconds control_period{200};  // 5 Hz
+
+    ai_iv::domains::metabojoint::MetaboJointVault vault;
+    bool steric_cage_was_breached = false;
     
 #ifdef ENABLE_REST_API
     std::unique_ptr<RestApiServer> rest_api;
@@ -98,6 +102,24 @@ public:
             // 1. Acquire telemetry
             Telemetry measurement = acquire_telemetry();
             
+            // MetaboJointDomain integration
+            double dt_seconds = control_period.count() / 1000.0;
+            vault.tick_elution(dt_seconds);
+
+            measurement.vault_mesh_size_nm = vault.get_mesh_size();
+            measurement.vault_payload_pct = vault.get_payload_remaining();
+            measurement.vault_cage_breached = vault.is_steric_cage_breached();
+
+            if (!steric_cage_was_breached && vault.is_steric_cage_breached()) {
+                logger.log_alert(
+                    AlertSeverity::Info,
+                    "MetaboJointDomain",
+                    "PAYLOAD_ELUTION_STARTED",
+                    "Steric cage breached, CRISPR payload elution initiated.",
+                    std::string("{\"mesh_size_nm\":") + std::to_string(vault.get_mesh_size()) + "}");
+                steric_cage_was_breached = true;
+            }
+
             // 2. State estimation with energy transfer model
             PatientState state = estimator.estimate(measurement, profile, current_infusion_rate);
             
