@@ -104,6 +104,12 @@ public:
             
             // MetaboJointDomain integration
             double dt_seconds = control_period.count() / 1000.0;
+            // Drive vault state estimation from current telemetry before elution tick.
+            // Lower pH and higher fatigue/lactate imply a more proteolytic niche.
+            double ambient_ph = std::clamp(7.4 - (measurement.lactate_mmol - 1.0) * 0.18, 6.2, 7.6);
+            double cathepsin_k_activity = std::clamp(
+                0.15 + (measurement.fatigue_idx * 0.6) + (measurement.blood_loss_idx * 0.4), 0.0, 1.0);
+            vault.update_telemetry(ambient_ph, cathepsin_k_activity);
             vault.tick_elution(dt_seconds);
 
             measurement.vault_mesh_size_nm = vault.get_mesh_size();
