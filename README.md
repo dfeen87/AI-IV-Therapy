@@ -1,5 +1,6 @@
 # AI-Optimized Intravenous Therapy Control System (AI-IV)
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
 ![Version](https://img.shields.io/badge/version-v4.2.0-blueviolet)
