@@ -26,6 +26,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o ai_iv
 
       - name: Build alert smoke-test variant
@@ -36,6 +37,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o ai_iv_alert_test
 
       - name: Run alert smoke-test
@@ -50,6 +52,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o ai_iv_with_api
 
       - name: Verify REST API binary
@@ -65,6 +68,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o test_safety_monitor
           g++ -std=c++17 -Wall -Wextra -pthread -I src \
             tests/test_state_estimator.cpp \
@@ -72,6 +76,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o test_state_estimator
           ./test_safety_monitor
           ./test_state_estimator
@@ -115,6 +120,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o ai_iv_neural
 
       - name: Build and run neural estimator unit tests
@@ -128,6 +134,7 @@ jobs:
             src/SafetyMonitor.cpp \
             src/StateEstimator.cpp \
             src/AdaptiveController.cpp \
+            src/precision_spine/PrecisionSpine.cpp \
             -o test_neural_estimator
           ./test_neural_estimator
 
