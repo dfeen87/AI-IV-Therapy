@@ -3,11 +3,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
-![Version](https://img.shields.io/badge/version-v4.2.0-blueviolet)
+![Version](https://img.shields.io/badge/version-v5.0.0-blueviolet)
 
 **Primary Language:** C++17  
 **Supplementary Reference:** HTML / JavaScript (conceptual parity)  
-**Current Status:** v4.2.0 — Stable Pre-Clinical Research System  
+**Current Status:** v5.0.0 — Stable Pre-Clinical Research System  
 
 ---
 
