@@ -26,6 +26,7 @@
 #include "StateEstimator.hpp"
 #include "AdaptiveController.hpp"
 #include "domains/metabojoint_domain.hpp"
+#include "precision_spine/PrecisionSpine.hpp"
 
 // REST API Server (optional - enable with -DENABLE_REST_API flag)
 #ifdef ENABLE_REST_API
@@ -131,15 +132,21 @@ public:
             
             double cycle_duration_min = control_period.count() / 60000.0;
 
-            // 3. Control decision with predictive capability
-            ControlOutput command = controller.decide(state, safety, estimator, cycle_duration_min);
+            // 3. Precision Spine Routing
+            // Enforce deterministic validation and fallback floor before adaptive control
+            precision_spine::TreatmentFlow routed_flow = precision_spine::dose_route(state);
+            precision_spine::TreatmentFlow safe_flow = precision_spine::reject_noise(routed_flow);
+            PatientState validated_state = precision_spine::fallback_floor(safe_flow);
             
-            // 4. Update current rate for next cycle
+            // 4. Control decision with predictive capability on validated state
+            ControlOutput command = controller.decide(validated_state, safety, estimator, cycle_duration_min);
+
+            // 5. Update current rate for next cycle
             current_infusion_rate = command.infusion_ml_per_min;
             
-            // 5. Logging
+            // 6. Logging
             logger.log_telemetry(measurement);
-            logger.log_control(command, state, measurement.timestamp);
+            logger.log_control(command, validated_state, measurement.timestamp);
 
 #ifdef ENABLE_REST_API
             // Update REST API with current data
@@ -223,16 +230,16 @@ public:
                 }
             }
             
-            // 6. Display status
-            display_status(state, command);
+            // 7. Display status
+            display_status(validated_state, command);
             
-            // 7. Update safety monitor
+            // 8. Update safety monitor
             safety.update_volume(command.infusion_ml_per_min, cycle_duration_min);
             
-            // 8. Send command to infusion pump (placeholder)
+            // 9. Send command to infusion pump (placeholder)
             // send_to_pump(command.infusion_ml_per_min);
             
-            // 9. Timing
+            // 10. Timing
             next_tick += control_period;
             std::this_thread::sleep_until(next_tick);
         }
