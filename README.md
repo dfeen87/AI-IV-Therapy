@@ -11,6 +11,12 @@
 
 ---
 
+## Precision-Flow Architecture (PFA)
+
+The system is built on the **Precision-Flow Architecture (PFA)**, which uses a strict, deterministic, 64-byte aligned "spine" to validate all incoming signals before they reach the adaptive dosing logic. Inspired by the safety-first constraint-driven philosophy of CuraFrame, this ensures safe, predictable fallback behavior and the rejection of chaotic noise.
+
+For full details, see [docs/PFA_ARCHITECTURE.md](docs/PFA_ARCHITECTURE.md).
+
 ## Overview
 
 This repository contains a **production-grade, pre-clinical reference implementation** of an **AI-optimized, closed-loop intravenous (IV) therapy control system**.

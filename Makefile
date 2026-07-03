@@ -6,14 +6,15 @@ SRCS = src/adaptive_iv_therapy_control_system.cpp \
        src/SystemLogger.cpp \
        src/SafetyMonitor.cpp \
        src/StateEstimator.cpp \
-       src/AdaptiveController.cpp
+       src/AdaptiveController.cpp \
+       src/precision_spine/PrecisionSpine.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
 TARGET = ai_iv
 
 # Tests
-TEST_SRCS = src/SystemLogger.cpp src/SafetyMonitor.cpp src/StateEstimator.cpp src/AdaptiveController.cpp
+TEST_SRCS = src/SystemLogger.cpp src/SafetyMonitor.cpp src/StateEstimator.cpp src/AdaptiveController.cpp src/precision_spine/PrecisionSpine.cpp
 TEST_OBJS = $(TEST_SRCS:.cpp=.o)
 
 # Neural estimator settings
