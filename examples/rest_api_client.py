@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Licensed under the PolyForm Noncommercial License 1.0.0
+
 """
 Simple REST API client example for AI-IV Therapy Control System
 Demonstrates real-time monitoring of telemetry and system state

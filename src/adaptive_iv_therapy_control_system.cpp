@@ -1,3 +1,5 @@
+// Licensed under the PolyForm Noncommercial License 1.0.0
+
 /*
  * AI-Optimized Intravenous Therapy Control System
  * Enhanced with Full Energy Transfer Model from White Paper Section 4.1

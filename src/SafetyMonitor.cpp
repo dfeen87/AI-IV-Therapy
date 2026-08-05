@@ -1,3 +1,5 @@
+// Licensed under the PolyForm Noncommercial License 1.0.0
+
 #include "SafetyMonitor.hpp"
 #include "config_defaults.hpp"
 #include <algorithm>

@@ -1,3 +1,5 @@
+// Licensed under the PolyForm Noncommercial License 1.0.0
+
 /*
  * REST API Server for AI-IV Therapy Control System
  * Provides global network access to system telemetry, status, and control data

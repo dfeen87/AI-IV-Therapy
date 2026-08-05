@@ -1,3 +1,5 @@
+# Licensed under the PolyForm Noncommercial License 1.0.0
+
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -pthread
 INCLUDES = -I src
