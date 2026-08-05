@@ -1,3 +1,5 @@
+// Licensed under the PolyForm Noncommercial License 1.0.0
+
 #include "simulation_metrics_observer.hpp"
 #include <algorithm>
 #include <cmath>

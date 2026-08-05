@@ -1,6 +1,6 @@
 # AI-Optimized Intravenous Therapy Control System (AI-IV)
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-orange.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0)
 ![Language: C++17](https://img.shields.io/badge/C%2B%2B-17-blue.svg)
 ![Status: Pre-Clinical](https://img.shields.io/badge/Status-Pre--Clinical-orange.svg)
 ![Version](https://img.shields.io/badge/version-v5.0.0-blueviolet)
@@ -29,7 +29,7 @@ AI-IV demonstrates how **real-time physiological telemetry**, **predictive state
 - Future regulated medical device development
 
 > **Important:**  
-> This software is **not a clinical device**. It is intended for **research, simulation, and pre-clinical development**, and is released as open-source under the **MIT License**.
+> This software is **not a clinical device**. It is intended for **research, simulation, and pre-clinical development**, and is released under the **PolyForm Noncommercial License 1.0.0**.
 
 ---
 
@@ -320,6 +320,13 @@ I would like to acknowledge **Microsoft Copilot**, **Anthropic Claude**, **Googl
 
 ## License
 
-This project is open-source and released under the **MIT License**.
+This project is licensed under the **PolyForm Noncommercial License 1.0.0**.
 
-You may use, copy, modify, distribute, sublicense, and/or sell this software under the terms of the MIT License. See [LICENSE](LICENSE) for full details.
+For full details, please see the [LICENSE](LICENSE) file or visit [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+
+### Short Summary of Non-Commercial Terms
+Under this license, you are free to use, modify, copy, and distribute this software for any **non-commercial** purpose, including:
+* **Personal & Hobbyist Uses:** Private study, personal hobby projects, research, experimentation, and testing for public knowledge.
+* **Non-commercial Organizations:** Use by educational institutions, charitable organizations, public research organizations, public safety/health/environmental protection organizations, and government institutions.
+
+**Commercial use, resale, or distribution of this software is strictly prohibited** without a separate commercial license from the copyright holder.

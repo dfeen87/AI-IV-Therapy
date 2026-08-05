@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Licensed under the PolyForm Noncommercial License 1.0.0
+
 """
 Train and export the AI-IV sensor fusion neural network.
 
