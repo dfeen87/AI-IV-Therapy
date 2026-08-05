@@ -329,4 +329,4 @@ Under this license, you are free to use, modify, copy, and distribute this softw
 * **Personal & Hobbyist Uses:** Private study, personal hobby projects, research, experimentation, and testing for public knowledge.
 * **Non-commercial Organizations:** Use by educational institutions, charitable organizations, public research organizations, public safety/health/environmental protection organizations, and government institutions.
 
-**Commercial use, resale, or distribution of this software is strictly prohibited** without a separate commercial license from the copyright holder.
+**Commercial use, resale, or commercial distribution of this software is strictly prohibited** without a separate commercial license from the copyright holder.
