@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-# Licensed under the PolyForm Noncommercial License 1.0.0
+# Copyright (c) Don Michael Feeney Jr.
+# Licensed under the MIT License.
 
 """
 Train and export the AI-IV sensor fusion neural network.
