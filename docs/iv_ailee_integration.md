@@ -1,6 +1,6 @@
 # AILEE Trust Layer Integration (Simulation Extensions)
 
-**Version:** v4.2.0
+**Version:** v5.1.0
 
 > **Staging Notice:** The modules described in this document (`iv_logic/` and
 > `iv_extensions/`) are staging additions. They are not yet included in the CI build

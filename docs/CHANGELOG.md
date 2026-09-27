@@ -7,6 +7,23 @@ All releases are **pre-clinical research only** unless explicitly stated otherwi
 
 ---
 
+## [5.1.0] — Version Synchronization & Release Update
+
+**Status:** Pre-Clinical Research (Non-Clinical Use)
+
+This release updates all version identifiers across the repository to **v5.1.0**, establishing complete version consistency across the C++ control core, optional REST API server, test suites, and documentation.
+
+### Changed
+
+- **`src/adaptive_iv_therapy_control_system.cpp`**: Updated startup banner string to `v5.1.0`.
+- **`src/rest_api_server.cpp`**: Updated `version` and `api_version` JSON strings returned by root `/api/` and status `/api/status` endpoints to `5.1.0`.
+- **`README.md`**: Updated version badge and status line to `v5.1.0`.
+- **`VALIDATION_AND_TESTING.md`**: Updated title, build results header, and limitations references to `v5.1.0`.
+- **`docs/VALIDATION.md`**: Updated document version header and all release scope references to `v5.1.0`.
+- **`docs/iv_ailee_integration.md`**: Updated version header to `v5.1.0`.
+
+---
+
 ## [4.2.0] — AILEE Trust Layer Integration Modules
 
 **Status:** Pre-Clinical Research (Non-Clinical Use)
