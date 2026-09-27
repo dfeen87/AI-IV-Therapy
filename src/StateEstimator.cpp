@@ -88,14 +88,18 @@ double StateEstimator::calculate_energy_transfer_absolute(const Telemetry& m,
     double v = estimate_flow_velocity(m, infusion_rate_ml_min, weight_kg);
     double G_v = Utils::gaussian(v, params.v_optimal_cm_s, params.sigma_velocity);
 
-    double m_dot = infusion_rate_ml_min / 60000.0;
+    double m_dot = std::max(0.0, infusion_rate_ml_min) / 60000.0;
 
     double I_sp = params.I_sp_standard * 1000.0;
 
     double eta = calculate_tissue_efficiency(m, params, perfusion_state);
 
     double infusion_power = m_dot * I_sp * eta * G_v;
-    double T_t = (P_input + infusion_power) / weight_kg;
+    // A missing or invalid weight should not turn the complete state estimate
+    // into infinity/NaN. Use a conservative non-zero denominator until a
+    // validated profile is supplied.
+    double effective_weight_kg = std::max(1.0, weight_kg);
+    double T_t = (P_input + infusion_power) / effective_weight_kg;
 
     return T_t;
 }
@@ -211,15 +215,16 @@ PatientState StateEstimator::estimate(const Telemetry& m, const PatientProfile& 
 }
 
 std::optional<PatientState> StateEstimator::predict_forward(int minutes_ahead) {
-    if (history.size() < 5) return std::nullopt;
+    if (history.size() < 5 || minutes_ahead < 0) return std::nullopt;
 
     PatientState predicted = history.back();
 
     size_t history_idx = history.size() - 5;
+    constexpr double intervals = 4.0; // Five samples contain four intervals.
     double hydration_trend = (history.back().hydration_pct -
-                             history[history_idx].hydration_pct) / 5.0;
+                             history[history_idx].hydration_pct) / intervals;
     double energy_trend = (history.back().energy_T -
-                          history[history_idx].energy_T) / 5.0;
+                          history[history_idx].energy_T) / intervals;
 
     predicted.hydration_pct += hydration_trend * minutes_ahead;
     predicted.energy_T += energy_trend * minutes_ahead;
